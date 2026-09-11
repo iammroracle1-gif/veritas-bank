@@ -76,16 +76,28 @@ export default function DashboardPage() {
 
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm">
+              <button 
+                onClick={() => navigate('/dashboard/transfer')}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm"
+              >
                 Send Money
               </button>
-              <button className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm">
+              <button 
+                onClick={() => navigate('/dashboard/deposit')}
+                className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm"
+              >
                 Deposit
               </button>
-              <button className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm">
+              <button 
+                onClick={() => navigate('/dashboard/withdraw')}
+                className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm"
+              >
                 Withdraw
               </button>
-              <button className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm">
+              <button 
+                onClick={() => navigate('/dashboard/transactions')}
+                className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 rounded-2xl font-semibold text-base transition-colors shadow-sm"
+              >
                 Transactions
               </button>
             </div>
@@ -122,27 +134,29 @@ export default function DashboardPage() {
                 </button>
               </div>
               <div className="space-y-1">
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <div>
-                    <p className="text-gray-900 font-semibold text-base">Salary Deposit</p>
-                    <p className="text-gray-400 text-sm mt-1">Jan 15, 2026</p>
+                {dashboardData?.data?.recentTransactions && dashboardData.data.recentTransactions.length > 0 ? (
+                  dashboardData.data.recentTransactions.map((transaction: any) => (
+                    <div key={transaction.id} className="flex justify-between items-center py-4 border-b border-gray-100 last:border-0">
+                      <div>
+                        <p className="text-gray-900 font-semibold text-base">{transaction.description}</p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          {new Date(transaction.createdAt).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </p>
+                      </div>
+                      <span className={`font-bold text-lg ${transaction.amount >= 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                        {transaction.amount >= 0 ? '+' : ''}{transaction.currency === 'USD' ? '$' : ''}{Math.abs(transaction.amount).toFixed(2)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400 text-sm">No recent transactions</p>
                   </div>
-                  <span className="text-green-600 font-bold text-lg">+$5,000.00</span>
-                </div>
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <div>
-                    <p className="text-gray-900 font-semibold text-base">Grocery Store</p>
-                    <p className="text-gray-400 text-sm mt-1">Jan 14, 2026</p>
-                  </div>
-                  <span className="text-gray-900 font-bold text-lg">-$120.50</span>
-                </div>
-                <div className="flex justify-between items-center py-4">
-                  <div>
-                    <p className="text-gray-900 font-semibold text-base">Electric Bill</p>
-                    <p className="text-gray-400 text-sm mt-1">Jan 13, 2026</p>
-                  </div>
-                  <span className="text-gray-900 font-bold text-lg">-$85.00</span>
-                </div>
+                )}
               </div>
             </div>
           </div>
