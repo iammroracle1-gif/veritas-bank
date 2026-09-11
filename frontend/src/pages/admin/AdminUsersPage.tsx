@@ -41,8 +41,9 @@ export default function AdminUsersPage() {
     return matchesSearch && matchesStatus
   }) : []
 
-  // Update status mutation
-  const updateStatusMutation = useMutation({
+  // Note: updateStatusMutation is available but not used in this component
+  // Status changes are handled in AdminUserDetailsPage
+  const _updateStatusMutation = useMutation({
     mutationFn: ({ userId, status }: { userId: string; status: string }) =>
       adminApi.updateUserStatus(userId, status),
     onSuccess: () => {

@@ -13,7 +13,6 @@ type BalanceAdjustmentForm = {
 
 export default function AdminUserDetailsPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [showAdjustModal, setShowAdjustModal] = useState(false)
   const [showRestrictionsModal, setShowRestrictionsModal] = useState(false)
@@ -65,7 +64,12 @@ export default function AdminUserDetailsPage() {
 
   // Update restrictions mutation
   const updateRestrictionsMutation = useMutation({
-    mutationFn: (restrictions: any) => adminApi.updateUserRestrictions(id!, restrictions),
+    mutationFn: (restrictions: {
+      transferRestricted?: boolean
+      withdrawalRestricted?: boolean
+      depositRestricted?: boolean
+      restrictionReason?: string
+    }) => adminApi.updateUserRestrictions(id!, restrictions),
     onSuccess: () => {
       toast.success('Restrictions updated successfully')
       queryClient.invalidateQueries({ queryKey: ['admin-user', id] })
