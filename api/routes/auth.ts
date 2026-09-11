@@ -26,8 +26,8 @@ const generateToken = (payload: object): string => {
   if (!secret) {
     throw new Error('JWT_SECRET is not defined');
   }
-  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-  return jwt.sign(payload, secret, { expiresIn });
+  const expiresIn: string | number = process.env.JWT_EXPIRES_IN || '7d';
+  return jwt.sign(payload, secret, { expiresIn: expiresIn as string });
 };
 
 const generateAccountNumber = (): string => {
