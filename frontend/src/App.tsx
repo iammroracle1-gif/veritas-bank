@@ -11,6 +11,9 @@ import TransferPage from './pages/TransferPage'
 import DepositPage from './pages/DepositPage'
 import WithdrawPage from './pages/WithdrawPage'
 import TransactionsPage from './pages/TransactionsPage'
+import ProfilePage from './pages/ProfilePage'
+import SavingsPage from './pages/SavingsPage'
+import SupportPage from './pages/SupportPage'
 
 // Admin Pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
@@ -86,6 +89,30 @@ function App() {
           element={
             <ProtectedRoute>
               <TransactionsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/savings"
+          element={
+            <ProtectedRoute>
+              <SavingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/support"
+          element={
+            <ProtectedRoute>
+              <SupportPage />
             </ProtectedRoute>
           }
         />

@@ -53,9 +53,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/transfer"
+            to="/dashboard/transfer"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/transfer') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/transfer') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,9 +68,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/transactions"
+            to="/dashboard/transactions"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/transactions') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/transactions') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,9 +83,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/deposit"
+            to="/dashboard/deposit"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/deposit') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/deposit') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,9 +98,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/withdraw"
+            to="/dashboard/withdraw"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/withdraw') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/withdraw') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,9 +113,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/savings"
+            to="/dashboard/savings"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/savings') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/savings') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,9 +128,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/support"
+            to="/dashboard/support"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/support') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/support') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,9 +143,9 @@ export default function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           </Link>
 
           <Link
-            to="/profile"
+            to="/dashboard/profile"
             className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors group ${
-              isActive('/profile') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              isActive('/dashboard/profile') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
