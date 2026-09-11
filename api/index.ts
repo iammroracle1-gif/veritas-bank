@@ -12,16 +12,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  const path = req.url?.replace('/api', '') || '/';
+  // Parse the path - Vercel rewrites /api/* to /api with query params
+  let path = req.url || '/';
+  
+  // Remove query string
+  const queryIndex = path.indexOf('?');
+  if (queryIndex !== -1) {
+    path = path.substring(0, queryIndex);
+  }
+  
+  // Remove /api prefix if present
+  path = path.replace(/^\/api/, '');
+  
+  // Ensure path starts with /
+  if (!path.startsWith('/')) {
+    path = '/' + path;
+  }
 
   try {
     // Health check
-    if (path === '/health' || path === '/') {
+    if (path === '/health' || path === '/' || path === '') {
       return res.status(200).json({ 
         status: 'ok', 
         message: 'Veritas Bank API is running',
-        path: req.url,
-        method: req.method
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -60,17 +74,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       default:
         return res.status(404).json({ 
-          error: 'Not found',
-          path: req.url,
-          resource
+          error: 'Endpoint not found',
+          availableEndpoints: ['/health', '/auth/*', '/users/*', '/admin/*', '/transactions/*', '/currencies/*', '/support/*', '/savings/*']
         });
     }
   } catch (error: any) {
     console.error('API Error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
-      message: error.message,
-      path: req.url
+      message: error.message
     });
   }
 }
