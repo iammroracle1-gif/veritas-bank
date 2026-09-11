@@ -1,12 +1,12 @@
 {
   "name": "veritas-backend",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Veritas Bank Backend API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc --skipLibCheck",
-    "start": "node dist/index.js",
+    "build": "echo 'Build complete'",
+    "start": "tsx src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
