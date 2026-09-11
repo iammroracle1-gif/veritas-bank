@@ -45,31 +45,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     switch (resource) {
       case 'auth':
-        const { default: authHandler } = await import('./routes/auth');
+        const { default: authHandler } = await import('./routes/auth.js');
         return authHandler(req, res, pathParts.slice(1));
 
       case 'users':
-        const { default: userHandler } = await import('./routes/users');
+        const { default: userHandler } = await import('./routes/users.js');
         return userHandler(req, res, pathParts.slice(1));
 
       case 'admin':
-        const { default: adminHandler } = await import('./routes/admin');
+        const { default: adminHandler } = await import('./routes/admin.js');
         return adminHandler(req, res, pathParts.slice(1));
 
       case 'transactions':
-        const { default: transactionHandler } = await import('./routes/transactions');
+        const { default: transactionHandler } = await import('./routes/transactions.js');
         return transactionHandler(req, res, pathParts.slice(1));
 
       case 'currencies':
-        const { default: currencyHandler } = await import('./routes/currencies');
+        const { default: currencyHandler } = await import('./routes/currencies.js');
         return currencyHandler(req, res, pathParts.slice(1));
 
       case 'support':
-        const { default: supportHandler } = await import('./routes/support');
+        const { default: supportHandler } = await import('./routes/support.js');
         return supportHandler(req, res, pathParts.slice(1));
 
       case 'savings':
-        const { default: savingsHandler } = await import('./routes/savings');
+        const { default: savingsHandler } = await import('./routes/savings.js');
         return savingsHandler(req, res, pathParts.slice(1));
 
       default:
