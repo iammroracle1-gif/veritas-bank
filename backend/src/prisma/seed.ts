@@ -41,7 +41,7 @@ async function main() {
       firstName: 'Admin',
       lastName: 'User',
       phone: '+1234567890',
-      accountNumber: 'VB-ADMIN-001',
+      accountNumber: '202500000001',
       role: 'ADMIN',
       accountStatus: 'ACTIVE',
     },
@@ -52,99 +52,12 @@ async function main() {
     update: {},
     create: {
       userId: admin.id,
-      balance: 5000.0,
+      balance: 0.0,
     },
   });
 
-  console.log('✓ Admin user created');
-
-  // Create test user
-  const userPassword = await bcrypt.hash('User@123', 10);
-  const user = await prisma.user.upsert({
-    where: { email: 'user@veritasbank.com' },
-    update: {},
-    create: {
-      email: 'user@veritasbank.com',
-      password: userPassword,
-      firstName: 'John',
-      lastName: 'Doe',
-      phone: '+1234567891',
-      accountNumber: 'VB-USER-001',
-      role: 'USER',
-      accountStatus: 'ACTIVE',
-    },
-  });
-
-  await prisma.account.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      balance: 2500.0,
-    },
-  });
-
-  console.log('✓ Test user created');
-
-  // Create sample transactions for test user
-  await prisma.transaction.createMany({
-    data: [
-      {
-        userId: user.id,
-        reference: 'TXN-001',
-        transactionType: 'DEMO_CREDIT',
-        category: 'Salary',
-        description: 'Monthly salary deposit',
-        amount: 5000,
-        currency: 'USD',
-        status: 'COMPLETED',
-        previousBalance: 0,
-        resultingBalance: 5000,
-      },
-      {
-        userId: user.id,
-        reference: 'TXN-002',
-        transactionType: 'DEMO_DEBIT',
-        category: 'Groceries',
-        description: 'Supermarket purchase',
-        amount: -250,
-        currency: 'USD',
-        status: 'COMPLETED',
-        previousBalance: 5000,
-        resultingBalance: 4750,
-      },
-      {
-        userId: user.id,
-        reference: 'TXN-003',
-        transactionType: 'DEMO_DEBIT',
-        category: 'Utilities',
-        description: 'Electric bill payment',
-        amount: -150,
-        currency: 'USD',
-        status: 'COMPLETED',
-        previousBalance: 4750,
-        resultingBalance: 4600,
-      },
-    ],
-  });
-
-  console.log('✓ Sample transactions created');
-
-  // Create sample savings goals
-  await prisma.savingsGoal.create({
-    data: {
-      userId: user.id,
-      goalName: 'Emergency Fund',
-      targetAmount: 10000,
-      currentAmount: 2500,
-      deadline: new Date('2025-12-31'),
-      status: 'ACTIVE',
-    },
-  });
-
-  console.log('✓ Sample savings goal created');
-
-  console.log('✅ Database seeded successfully');
+  console.log('✓ Admin user created: admin@veritasbank.com / Admin@123');
+  console.log('✅ Database seeded successfully - All users will start with $0 balance');
 }
 
 main()
