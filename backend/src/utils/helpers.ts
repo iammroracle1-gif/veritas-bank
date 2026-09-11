@@ -17,8 +17,8 @@ export const generateToken = (payload: object): string => {
   if (!secret) {
     throw new Error('JWT_SECRET is not defined');
   }
-  const expiresIn = (process.env.JWT_EXPIRES_IN || '7d') as string;
-  return jwt.sign(payload, secret, { expiresIn });
+  // @ts-ignore - TS has issues with expiresIn type inference
+  return jwt.sign(payload, secret, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 };
 
 export const generateAccountNumber = (): string => {
