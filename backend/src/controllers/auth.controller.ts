@@ -146,25 +146,13 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
-      include: { account: true },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        accountNumber: true,
-        role: true,
-        accountStatus: true,
-        preferredCurrency: true,
-        createdAt: true,
-        lastLogin: true,
+      include: { 
         account: {
           select: {
             balance: true,
             baseCurrency: true,
           },
-        },
+        }
       },
     });
 
