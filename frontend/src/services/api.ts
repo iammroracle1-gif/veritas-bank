@@ -1,16 +1,7 @@
 import axios from 'axios'
 import { useAuthStore } from '../stores/authStore'
 
-// Type-safe environment variable access
-interface ImportMetaEnv {
-  readonly VITE_API_URL?: string
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv
-}
-
-const API_URL = (import.meta as ImportMeta).env.VITE_API_URL || 'http://localhost:3000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 export const api = axios.create({
   baseURL: API_URL,

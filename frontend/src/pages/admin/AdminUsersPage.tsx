@@ -41,20 +41,6 @@ export default function AdminUsersPage() {
     return matchesSearch && matchesStatus
   }) : []
 
-  // Note: updateStatusMutation is available but not used in this component
-  // Status changes are handled in AdminUserDetailsPage
-  const _updateStatusMutation = useMutation({
-    mutationFn: ({ userId, status }: { userId: string; status: string }) =>
-      adminApi.updateUserStatus(userId, status),
-    onSuccess: () => {
-      toast.success('User status updated successfully')
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-    },
-    onError: () => {
-      toast.error('Failed to update user status')
-    },
-  })
-
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'active':
