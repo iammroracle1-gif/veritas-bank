@@ -1,0 +1,175 @@
+// Prisma Schema for Veritas Bank V2
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User Model - Supports both users and admins
+model User {
+  id             String   @id @default(uuid())
+  firstName      String   @map("first_name")
+  lastName       String   @map("last_name")
+  email          String   @unique
+  phone          String?
+  password       String
+  accountNumber  String   @unique @map("account_number")
+  role           String   @default("USER")
+  accountStatus  String   @default("ACTIVE") @map("account_status")
+  preferredCurrency String @default("USD") @map("preferred_currency")
+  
+  // Restriction fields
+  transferRestricted    Boolean @default(false) @map("transfer_restricted")
+  withdrawalRestricted  Boolean @default(false) @map("withdrawal_restricted")
+  depositRestricted     Boolean @default(false) @map("deposit_restricted")
+  restrictionReason     String? @map("restriction_reason")
+  
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  lastLogin      DateTime? @map("last_login")
+  
+  // Relations
+  account              Account?
+  transactions         Transaction[]
+  createdTransactions  Transaction[] @relation("CreatedBy")
+  auditLogsPerformed   AuditLog[] @relation("AdminLogs")
+  auditLogsReceived    AuditLog[] @relation("TargetUserLogs")
+  supportRequests      SupportRequest[]
+  savingsGoals         SavingsGoal[]
+  
+  @@map("users")
+  @@index([email])
+  @@index([accountNumber])
+  @@index([role])
+}
+
+// Enums converted to strings for SQLite compatibility
+
+// Account Model - Stores user balances
+model Account {
+  id           String   @id @default(uuid())
+  userId       String   @unique @map("user_id")
+  baseCurrency String   @default("USD") @map("base_currency")
+  balance      Float    @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("accounts")
+  @@index([userId])
+}
+
+// Transaction Model
+model Transaction {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  reference       String          @unique
+  transactionType String @map("transaction_type")
+  category        String?
+  description     String?
+  amount          Float
+  currency        String
+  status          String @default("COMPLETED")
+  previousBalance Float?        @map("previous_balance")
+  resultingBalance Float?       @map("resulting_balance")
+  createdBy       String?         @map("created_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  
+  // Relations
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creator User? @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  
+  @@map("transactions")
+  @@index([userId])
+  @@index([reference])
+  @@index([createdAt])
+  @@index([transactionType])
+}
+
+
+
+// Currency Model
+model Currency {
+  id             String   @id @default(uuid())
+  currencyName   String   @map("currency_name")
+  currencyCode   String   @unique @map("currency_code")
+  currencySymbol String   @map("currency_symbol")
+  exchangeRate   Float  @default(1) @map("exchange_rate")
+  rateUpdatedAt  DateTime @default(now()) @map("rate_updated_at")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  
+  @@map("currencies")
+  @@index([currencyCode])
+  @@index([isActive])
+}
+
+// Audit Log Model
+model AuditLog {
+  id           String   @id @default(uuid())
+  adminId      String   @map("admin_id")
+  action       String
+  targetUserId String?  @map("target_user_id")
+  oldValue     String?  @map("old_value")
+  newValue     String?  @map("new_value")
+  reason       String?
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  admin      User  @relation("AdminLogs", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("TargetUserLogs", fields: [targetUserId], references: [id], onDelete: Cascade)
+  
+  @@map("audit_logs")
+  @@index([adminId])
+  @@index([targetUserId])
+  @@index([createdAt])
+}
+
+// Support Request Model
+model SupportRequest {
+  id        String        @id @default(uuid())
+  userId    String        @map("user_id")
+  subject   String
+  message   String
+  status    String @default("OPEN")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("support_requests")
+  @@index([userId])
+  @@index([status])
+}
+
+
+
+// Savings Goal Model
+model SavingsGoal {
+  id            String      @id @default(uuid())
+  userId        String      @map("user_id")
+  goalName      String      @map("goal_name")
+  targetAmount  Float     @map("target_amount")
+  currentAmount Float     @default(0) @map("current_amount")
+  deadline      DateTime?
+  status        String  @default("ACTIVE")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("savings_goals")
+  @@index([userId])
+  @@index([status])
+}
+
+
