@@ -15,21 +15,21 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-20">
-        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
           <div className="flex items-center">
             <Link to="/">
-              <img src="/images/ChatGPT_Image_Sep_7__2026__02_17_55_PM-removebg-preview.png" alt="Veritas Bank Logo" className="h-11" />
+              <img src="/images/ChatGPT_Image_Sep_7__2026__02_17_55_PM-removebg-preview.png" alt="Veritas Bank Logo" className="h-8 md:h-11" />
             </Link>
           </div>
-          <div className="hidden md:flex items-center flex-1 ml-12 space-x-8">
-            <a href="#home" className="text-gray-800 hover:text-primary-500 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:right-0 after:h-[3px] after:bg-primary-500 after:opacity-100 transition-opacity">Home</a>
-            <a href="#about" className="text-gray-800 hover:text-primary-500 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:right-0 after:h-[3px] after:bg-primary-500 after:opacity-0 hover:after:opacity-100 after:transition-opacity">About</a>
-            <a href="#contact" className="text-gray-800 hover:text-primary-500 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:right-0 after:h-[3px] after:bg-primary-500 after:opacity-0 hover:after:opacity-100 after:transition-opacity">Contact</a>
+          <div className="hidden lg:flex items-center flex-1 ml-12 space-x-6 xl:space-x-8">
+            <a href="#home" className="text-sm xl:text-base text-gray-800 hover:text-primary-500 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:right-0 after:h-[3px] after:bg-primary-500 after:opacity-100 transition-opacity">Home</a>
+            <a href="#about" className="text-sm xl:text-base text-gray-800 hover:text-primary-500 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:right-0 after:h-[3px] after:bg-primary-500 after:opacity-0 hover:after:opacity-100 after:transition-opacity">About</a>
+            <a href="#contact" className="text-sm xl:text-base text-gray-800 hover:text-primary-500 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:right-0 after:h-[3px] after:bg-primary-500 after:opacity-0 hover:after:opacity-100 after:transition-opacity">Contact</a>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Search Box */}
-            <div className="hidden lg:flex items-center bg-gray-100 rounded-full px-4 py-2 transition-shadow focus-within:shadow-md">
+            <div className="hidden xl:flex items-center bg-gray-100 rounded-full px-4 py-2 transition-shadow focus-within:shadow-md">
               <input 
                 type="text" 
                 placeholder="Search..." 
@@ -44,40 +44,40 @@ export default function LandingPage() {
             
             {token && user ? (
               <>
-                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-full">
-                  <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-sm">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full">
+                  <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold text-xs">
                     {user.firstName[0]}{user.lastName[0]}
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-xs md:text-sm font-medium text-gray-700 hidden md:inline">
                     {user.firstName} {user.lastName}
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all hover:shadow-lg font-medium"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm bg-red-500 text-white rounded-full hover:bg-red-600 transition-all hover:shadow-lg font-medium"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  Logout
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </>
             ) : (
               <>
                 <Link
                   to="/register"
-                  className="flex items-center gap-2 px-6 py-2.5 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-all hover:shadow-lg font-medium"
+                  className="flex items-center gap-1.5 px-3 sm:px-5 py-2 text-xs sm:text-sm bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-all hover:shadow-lg font-medium"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
                   Register
                 </Link>
                 <Link
                   to="/login"
-                  className="flex items-center gap-2 px-6 py-2.5 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-all hover:shadow-lg font-medium"
+                  className="flex items-center gap-1.5 px-3 sm:px-5 py-2 text-xs sm:text-sm bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-all hover:shadow-lg font-medium"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
                   Login
@@ -89,7 +89,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen mt-0 flex items-center overflow-hidden bg-[url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2070')] bg-cover bg-center bg-fixed">
+      <section className="relative min-h-screen pt-20 md:pt-24 flex items-center overflow-hidden bg-[url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2070')] bg-cover bg-center bg-fixed">
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
         
@@ -97,16 +97,16 @@ export default function LandingPage() {
         <div className="absolute top-0 left-0 w-1 h-32 bg-primary-500 rotate-45 origin-top-left opacity-0 animate-[lineSlideIn_0.8s_ease-out_0.3s_forwards]"></div>
         
         {/* Hero Content */}
-        <div className="relative max-w-7xl mx-auto px-6 w-full">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full py-12 md:py-20">
           <div className="max-w-3xl text-white opacity-0 animate-[fadeInUp_1s_ease-out_0.5s_forwards]">
-            <h1 className="text-6xl font-bold mb-6 flex flex-col leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 flex flex-col leading-tight">
               <span className="font-bold">From your plans to</span>
               <span className="font-light">real possibilities</span>
             </h1>
             
-            <h2 className="text-2xl font-medium mb-6">Bank smarter and enjoy more freedom</h2>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-medium mb-4 md:mb-6">Bank smarter and enjoy more freedom</h2>
             
-            <p className="text-lg leading-relaxed mb-12 text-white/95">
+            <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-8 md:mb-12 text-white/95">
               Whether you are planning a getaway, sending money across borders, 
               or managing your everyday finances, our banking services give you 
               secure and convenient access to more possibilities.
@@ -114,7 +114,7 @@ export default function LandingPage() {
             
             <Link 
               to="/register" 
-              className="inline-block bg-transparent text-white border-2 border-white px-10 py-4 rounded-full font-medium text-base hover:bg-primary-500 hover:border-primary-500 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)] opacity-0 animate-[fadeIn_1s_ease-out_1s_forwards]"
+              className="inline-block bg-transparent text-white border-2 border-white px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-full font-medium text-sm md:text-base hover:bg-primary-500 hover:border-primary-500 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)] opacity-0 animate-[fadeIn_1s_ease-out_1s_forwards]"
             >
               Access More
             </Link>
