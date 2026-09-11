@@ -1,6 +1,6 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRoutes from '../backend/src/routes/auth.routes';
 import userRoutes from '../backend/src/routes/user.routes';
 import adminRoutes from '../backend/src/routes/admin.routes';
@@ -9,13 +9,11 @@ import currencyRoutes from '../backend/src/routes/currency.routes';
 import supportRoutes from '../backend/src/routes/support.routes';
 import savingsRoutes from '../backend/src/routes/savings.routes';
 
-dotenv.config();
-
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -45,4 +43,7 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-export default app;
+// Export handler for Vercel
+export default (req: VercelRequest, res: VercelResponse) => {
+  return app(req as any, res as any);
+};
