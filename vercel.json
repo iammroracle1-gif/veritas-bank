@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "cd backend && npx prisma generate && cd ../frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../api && npm install",
+  "installCommand": "cd backend && npm install && npx prisma generate && cd ../frontend && npm install && cd ../api && npm install",
   "functions": {
     "api/**/*.ts": {
       "memory": 1024,
@@ -13,6 +13,14 @@
     {
       "source": "/api/auth/:path*",
       "destination": "/api/auth"
+    },
+    {
+      "source": "/api/test",
+      "destination": "/api/test"
+    },
+    {
+      "source": "/api/debug",
+      "destination": "/api/debug"
     },
     {
       "source": "/api/:path*",
