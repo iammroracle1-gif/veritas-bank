@@ -1,420 +1,207 @@
-# 🏦 Veritas Bank V2.0
+# Veritas Bank - Demo Banking Platform
 
-<div align="center">
+A full-stack demonstration banking application with clean UI, real-time transactions, and admin controls.
 
-**Modern Banking Platform Built with React, TypeScript, Node.js & PostgreSQL**
+## 🚀 Features
 
-*Featuring iOS-inspired design with Web3 aesthetics*
+### User Features
+- **Account Management**: Unique 12-digit numeric account numbers
+- **Multi-Currency Support**: USD, EUR, GBP balances
+- **Transactions**: Deposits, withdrawals, and transfers with instant balance updates
+- **Transaction History**: Complete audit trail with reference numbers
+- **Savings Goals**: Set and track financial targets
+- **Support System**: Submit and track support tickets
+- **Clean iOS-Style Dashboard**: Modern, professional interface
 
-[Features](#features) • [Tech Stack](#tech-stack) • [Quick Start](#quick-start) • [Documentation](#documentation)
-
-</div>
-
----
-
-## ✨ Features
-
-### 👤 User Features
-- 🔐 **Secure Authentication** - JWT-based login with encrypted passwords
-- 📊 **Modern Dashboard** - Beautiful iOS-inspired interface with real-time balance
-- 💸 **Transaction Management** - Create, view, and track all transactions
-- 🌍 **Multi-Currency Support** - 10+ currencies with live exchange rates
-- 🎯 **Savings Goals** - Set and track financial goals
-- 🎫 **Support System** - Submit and manage support tickets
-- 👤 **Profile Management** - Update personal information and preferences
-
-### 🛡️ Admin Features
-- 📈 **Analytics Dashboard** - System-wide statistics and insights
-- 👥 **User Management** - View, search, filter, and manage all users
-- 💰 **Balance Adjustments** - Add/remove funds with full audit trail
-- 🔍 **Transaction Monitoring** - View all system transactions
-- 📝 **Audit Logs** - Complete trail of all administrative actions
-- 🔒 **Role-Based Access** - Secure admin-only features
-
-### 🎨 Design Features
-- 📱 **Fully Responsive** - Perfect on mobile, tablet, and desktop
-- 🌓 **Dark Mode** - Beautiful dark theme by default
-- ✨ **Smooth Animations** - Framer Motion for buttery transitions
-- 🔮 **Glassmorphism** - Modern glass effects and gradients
-- 🎯 **iOS Aesthetic** - Clean, minimal, intuitive design
-- 🌈 **Web3 Vibes** - Gradient cards and modern color schemes
-
----
+### Admin Features
+- **User Management**: View and manage all user accounts
+- **Balance Adjustment**: Load funds to user accounts
+- **Account Restrictions**: Control user permissions (transfer, withdraw, deposit)
+- **Transaction Oversight**: View all platform transactions
+- **Audit Logs**: Complete trail of all administrative actions
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-```
-React 18          - Modern UI library
-TypeScript        - Type-safe JavaScript
-Vite              - Lightning-fast build tool
-TailwindCSS       - Utility-first CSS framework
-Framer Motion     - Smooth animations
-React Query       - Data fetching & caching
-Zustand           - State management
-React Router      - Navigation
-React Hook Form   - Form handling
-Heroicons         - Beautiful icons
-React Hot Toast   - Notifications
-```
+- React 18 with TypeScript
+- Vite for blazing-fast development
+- TailwindCSS for styling
+- React Query for data management
+- React Hook Form for form handling
+- Zustand for state management
+- Axios for API calls
 
 ### Backend
-```
-Node.js           - JavaScript runtime
-Express           - Web framework
-TypeScript        - Type-safe JavaScript
-PostgreSQL        - Relational database
-Prisma            - Modern ORM
-JWT               - Authentication
-bcryptjs          - Password hashing
-Express Validator - Input validation
-```
+- Node.js with Express
+- TypeScript
+- Prisma ORM
+- SQLite database (easily swappable for PostgreSQL/MySQL)
+- JWT authentication
+- Bcrypt for password hashing
 
----
+## 📋 Prerequisites
 
-## 🚀 Quick Start
+- Node.js 16+ and npm
+- Git
 
-### Prerequisites
-- Node.js 18+ ([Download](https://nodejs.org/))
-- PostgreSQL 14+ ([Download](https://www.postgresql.org/download/))
+## 🔧 Installation
 
-### Installation
-
-**1. Create Database**
-```sql
-CREATE DATABASE veritas_bank;
-```
-
-**2. Backend Setup**
+### 1. Clone Repository
 ```bash
+git clone https://github.com/iammroracle1-gif/veritas-bank.git
+cd veritas-bank
+```
+
+### 2. Install Dependencies
+```bash
+# Install backend dependencies
 cd backend
 npm install
-cp .env.example .env
-# Edit .env with your database credentials
-npx prisma generate
-npx prisma migrate dev
-npm run prisma:seed
-npm run dev
+
+# Install frontend dependencies
+cd ../frontend
+npm install
 ```
 
-**3. Frontend Setup** (New Terminal)
+### 3. Environment Setup
+
+#### Backend (.env)
+Create `backend/.env`:
+```env
+DATABASE_URL="file:./prisma/dev.db"
+JWT_SECRET="your-super-secret-jwt-key-change-this"
+JWT_EXPIRES_IN="7d"
+PORT=3000
+```
+
+#### Frontend (.env)
+Create `frontend/.env`:
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+### 4. Database Setup
+```bash
+cd backend
+npx prisma generate
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+### 5. Start Development Servers
+
+**Backend:**
+```bash
+cd backend
+npm run dev
+# Runs on http://localhost:3000
+```
+
+**Frontend:**
 ```bash
 cd frontend
-npm install
 npm run dev
+# Runs on http://localhost:5173
 ```
 
-**4. Open Browser**
-```
-http://localhost:5173
-```
+## 👤 Demo Accounts
 
-### Default Credentials
+### Regular User
+- **Email**: user@veritasbank.com
+- **Password**: User@123
+- **Features**: Full access to user features
 
-**Admin Account**
-```
-Email: admin@veritasbank.com
-Password: Admin@123
-```
+### Admin User
+- **Email**: admin@veritasbank.com
+- **Password**: Admin@123
+- **Features**: Full admin control panel
 
-**Test User Account**
-```
-Email: user@veritasbank.com
-Password: User@123
-```
+## 📱 Key Features
 
-⚠️ **Change these in production!**
+### Security
+- ✅ Password hashing with bcrypt
+- ✅ JWT token authentication
+- ✅ 7-day session expiration
+- ✅ Role-based access control
+- ✅ Complete audit logging
 
----
+### Account System
+- ✅ Unique 12-digit account numbers (format: 202512345678)
+- ✅ New users start with $0 balance
+- ✅ Individual account for each user
+- ✅ Multi-currency balance tracking
 
-## 📚 Documentation
+### Transactions
+- ✅ Real-time balance updates
+- ✅ Transaction reference numbers
+- ✅ Complete transaction history
+- ✅ Previous/resulting balance tracking
+- ✅ Transaction status tracking
 
-- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Detailed setup instructions
-- **[PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md)** - Complete project overview
-- **[QUICK_START_WINDOWS.md](./QUICK_START_WINDOWS.md)** - Windows-specific guide
-
----
-
-## 📁 Project Structure
-
-```
-veritas-v2/
-├── backend/              # Node.js + Express API
-│   ├── prisma/          # Database schema & migrations
-│   ├── src/
-│   │   ├── controllers/ # Business logic
-│   │   ├── routes/      # API endpoints
-│   │   ├── middleware/  # Auth & validation
-│   │   └── utils/       # Helper functions
-│   └── .env.example     # Environment template
-│
-├── frontend/            # React application
-│   ├── src/
-│   │   ├── components/  # Reusable components
-│   │   ├── pages/       # Page components
-│   │   ├── services/    # API calls
-│   │   ├── stores/      # State management
-│   │   └── types/       # TypeScript types
-│   └── public/          # Static assets
-│
-└── README.md            # This file
-```
-
----
-
-## 🎨 Customization
-
-### Change Colors
-Edit `frontend/tailwind.config.js`:
-```javascript
-colors: {
-  primary: {
-    500: '#ff6b35', // Your brand color
-    // ...
-  }
-}
-```
-
-### Change Logo
-Replace files in `frontend/public/images/`
-
-### Add Features
-Create new pages in `frontend/src/pages/`
-
----
+### Admin Controls
+- ✅ Balance adjustment with reason logging
+- ✅ User restrictions (transfer/withdraw/deposit)
+- ✅ Complete audit trail
+- ✅ User account management
+- ✅ Transaction oversight
 
 ## 🚀 Deployment
 
-### Frontend (Vercel/Netlify)
-```bash
-cd frontend
-npm run build
-# Deploy dist/ folder
-```
+### Vercel (Frontend)
+1. Push code to GitHub
+2. Import repository in Vercel
+3. Set build settings:
+   - **Framework Preset**: Vite
+   - **Root Directory**: frontend
+   - **Build Command**: npm run build
+   - **Output Directory**: dist
+4. Add environment variable:
+   - `VITE_API_URL`: Your backend API URL
 
-### Backend (Railway/Render)
-```bash
-cd backend
-npm run build
-# Deploy with DATABASE_URL env variable
-```
+### Backend Deployment
+Deploy to:
+- **Railway**: Easy PostgreSQL setup
+- **Render**: Free tier available
+- **Heroku**: Simple deployment
+- **DigitalOcean**: Full control
 
-### Recommended Platforms
-- **Frontend**: Vercel, Netlify, Cloudflare Pages
-- **Backend**: Railway, Render, Heroku
-- **Database**: Railway, Supabase, Neon, AWS RDS
+**Environment Variables Required:**
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: Secure random string
+- `JWT_EXPIRES_IN`: 7d
+- `PORT`: 3000
 
----
+## 📄 Documentation
 
-## 🔒 Security
+- [Terms of Service](./TERMS_OF_SERVICE.md)
+- [Privacy Policy](./PRIVACY_POLICY.md)
 
-- ✅ JWT authentication
-- ✅ Password hashing (bcrypt)
-- ✅ Input validation
-- ✅ SQL injection prevention (Prisma)
-- ✅ CORS protection
-- ✅ Rate limiting ready
-- ✅ XSS protection
+## 🔒 Important Notes
 
-**Production Checklist:**
-- [ ] Change JWT_SECRET
-- [ ] Update default passwords
-- [ ] Enable HTTPS
-- [ ] Configure CORS
-- [ ] Set up backups
-- [ ] Monitor logs
+### Demo Platform
+- This is a demonstration banking platform
+- No real money is transferred
+- All transactions are simulated
+- For educational/demo purposes only
 
----
-
-## 📊 Database Schema
-
-```
-users
-├── User accounts (both users & admins)
-├── Authentication & profile info
-└── Role-based access control
-
-accounts
-└── User balances in base currency
-
-transactions
-├── All financial transactions
-├── Demo credits/debits
-└── Admin adjustments
-
-currencies
-└── Multi-currency exchange rates
-
-savings_goals
-└── User savings tracking
-
-support_requests
-└── Support ticket system
-
-audit_logs
-└── Admin action tracking
-```
-
----
-
-## 🛣️ API Endpoints
-
-### Authentication
-```
-POST   /api/auth/register      # Register new user
-POST   /api/auth/login         # Login
-GET    /api/auth/me            # Get current user
-POST   /api/auth/refresh       # Refresh token
-```
-
-### Users
-```
-GET    /api/users/profile      # Get profile
-PUT    /api/users/profile      # Update profile
-GET    /api/users/dashboard    # Dashboard data
-```
-
-### Transactions
-```
-GET    /api/transactions       # List transactions
-POST   /api/transactions/demo  # Create demo transaction
-GET    /api/transactions/:ref  # Get by reference
-```
-
-### Admin
-```
-GET    /api/admin/dashboard             # Admin stats
-GET    /api/admin/users                 # All users
-GET    /api/admin/users/:id             # User details
-PATCH  /api/admin/users/:id/status      # Update status
-POST   /api/admin/users/:id/adjust-balance  # Adjust balance
-GET    /api/admin/transactions          # All transactions
-```
-
-[See full API documentation in `backend/src/routes/`]
-
----
-
-## 🧪 Development
-
-### Run Both Servers
-```bash
-# From project root
-npm install
-npm run dev
-```
-
-### Backend Only
-```bash
-cd backend
-npm run dev
-```
-
-### Frontend Only
-```bash
-cd frontend
-npm run dev
-```
-
-### Database GUI
-```bash
-cd backend
-npx prisma studio
-```
-
----
-
-## 📝 Scripts
-
-### Backend
-```bash
-npm run dev         # Development server
-npm run build       # Build for production
-npm start           # Start production server
-npm run prisma:studio  # Database GUI
-npm run prisma:migrate # Run migrations
-npm run prisma:seed    # Seed database
-```
-
-### Frontend
-```bash
-npm run dev         # Development server
-npm run build       # Build for production
-npm run preview     # Preview production build
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Database Connection Issues
-- Verify PostgreSQL is running
-- Check DATABASE_URL in `.env`
-- Ensure database exists
-
-### Port Conflicts
-- Backend (3000): Change PORT in `backend/.env`
-- Frontend (5173): Change in `frontend/vite.config.ts`
-
-### Module Not Found
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
----
-
-## 📈 Performance
-
-- ⚡ **Fast Initial Load** - Vite optimized builds
-- 🚀 **Instant Navigation** - Client-side routing
-- 💾 **Smart Caching** - React Query
-- 📦 **Code Splitting** - Lazy loading ready
-- 🎯 **Optimized Images** - Next-gen formats ready
-
----
+### Data Privacy
+- Passwords are hashed (never stored in plain text)
+- JWT tokens expire automatically
+- Admin actions are fully logged
+- Transaction history is permanent
 
 ## 🤝 Contributing
 
-This is a proprietary project for Veritas Bank. For internal development:
+This is a demonstration project. Feel free to fork and modify for your own use.
 
-1. Create feature branch
-2. Make changes
-3. Test thoroughly
-4. Submit for review
+## 📜 License
 
----
-
-## 📄 License
-
-Proprietary - Veritas Bank © 2026
-
----
-
-## 🙏 Acknowledgments
-
-- Built with modern best practices
-- Inspired by leading fintech apps
-- Designed for scalability and performance
-
----
+This project is for demonstration purposes. See Terms of Service for usage terms.
 
 ## 📞 Support
 
-For technical support or questions:
-- Email: support@veritasbank.com
-- Check documentation files
-- Review terminal logs
-- Inspect browser console
+For questions or issues, use the in-app support system.
 
 ---
 
-<div align="center">
-
-**Made with ❤️ for Veritas Bank**
-
-*Modern Banking, Beautiful Design, Powerful Technology*
-
-[⬆ Back to Top](#-veritas-bank-v20)
-
-</div>
+**Built with ❤️ for demonstration purposes**
