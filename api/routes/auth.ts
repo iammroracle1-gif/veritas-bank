@@ -71,7 +71,11 @@ export default async function handler(
     }
   } catch (error: any) {
     console.error('Auth handler error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    console.error('Error stack:', error.stack);
+    return res.status(500).json({ 
+      error: error.message || 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   } finally {
     await prisma.$disconnect();
   }
@@ -82,71 +86,82 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, password, firstName, lastName, phone } = req.body as any;
+  try {
+    const { email, password, firstName, lastName, phone } = req.body as any;
 
-  // Validation
-  if (!email || !password || !firstName || !lastName) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
+    // Validation
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-  if (password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters' });
-  }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
 
-  // Check if user exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-  if (existingUser) {
-    return res.status(400).json({ error: 'Email already registered' });
-  }
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
 
-  // Hash password
-  const hashedPassword = await hashPassword(password);
-  const accountNumber = generateAccountNumber();
+    // Hash password
+    const hashedPassword = await hashPassword(password);
+    const accountNumber = generateAccountNumber();
 
-  // Create user
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      phone: phone || null,
-      accountNumber,
-      role: 'USER',
-      accountStatus: 'ACTIVE',
-    },
-  });
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        phone: phone || null,
+        accountNumber,
+        role: 'USER',
+        accountStatus: 'ACTIVE',
+      },
+    });
 
-  // Create account
-  await prisma.account.create({
-    data: {
-      userId: user.id,
-      balance: 0.0,
-    },
-  });
+    // Create account
+    await prisma.account.create({
+      data: {
+        userId: user.id,
+        balance: 0.0,
+      },
+    });
 
-  // Generate token
-  const token = generateToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  return res.status(201).json({
-    message: 'Registration successful',
-    token,
-    user: {
+    // Generate token
+    const token = generateToken({
       id: user.id,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      accountNumber: user.accountNumber,
       role: user.role,
-    },
-  });
+    });
+
+    return res.status(201).json({
+      message: 'Registration successful',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        accountNumber: user.accountNumber,
+        role: user.role,
+      },
+    });
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    return res.status(500).json({ 
+      error: 'Registration failed',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 }
 
 async function handleLogin(req: VercelRequest, res: VercelResponse) {
