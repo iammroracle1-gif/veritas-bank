@@ -1,11 +1,12 @@
-// Prisma Schema for Veritas Bank V2
+// Prisma Schema for Veritas Bank V2 - PostgreSQL (Vercel)
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // User Model - Supports both users and admins
