@@ -7,6 +7,10 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import DashboardPage from './pages/DashboardPage'
+import TransferPage from './pages/TransferPage'
+import DepositPage from './pages/DepositPage'
+import WithdrawPage from './pages/WithdrawPage'
+import TransactionsPage from './pages/TransactionsPage'
 
 // Admin Pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
@@ -44,12 +48,44 @@ function App() {
         <Route path="/register" element={token ? <Navigate to="/dashboard" /> : <RegisterPage />} />
         <Route path="/admin/login" element={token && user?.role === 'ADMIN' ? <Navigate to="/admin" /> : <AdminLoginPage />} />
 
-        {/* User Dashboard Route */}
+        {/* User Dashboard Routes */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/transfer"
+          element={
+            <ProtectedRoute>
+              <TransferPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/deposit"
+          element={
+            <ProtectedRoute>
+              <DepositPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/withdraw"
+          element={
+            <ProtectedRoute>
+              <WithdrawPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/transactions"
+          element={
+            <ProtectedRoute>
+              <TransactionsPage />
             </ProtectedRoute>
           }
         />
