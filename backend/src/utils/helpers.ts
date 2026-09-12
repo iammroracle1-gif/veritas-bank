@@ -22,9 +22,9 @@ export const generateToken = (payload: object): string => {
 };
 
 export const generateAccountNumber = (): string => {
-  // Generate numeric account number starting with 2025
+  // Generate 10-digit numeric account number starting with 2025
   const year = '2025';
-  const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+  const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
   return `${year}${random}`;
 };
 
