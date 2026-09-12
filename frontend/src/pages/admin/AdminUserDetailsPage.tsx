@@ -232,23 +232,39 @@ export default function AdminUserDetailsPage() {
                 <p className="text-xs text-gray-500 mt-1">User won't be able to send money</p>
               </div>
               <button
-                onClick={() => {
-                  // Toggle restriction
+                onClick={async () => {
                   const newValue = !user.transferRestricted
-                  // Call API to update
-                  fetch(`${import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'}/admin/users/${user.id}/restrict-transfer`, {
-                    method: 'PATCH',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({ restricted: newValue })
-                  }).then(() => {
+                  try {
+                    // Get admin token
+                    const token = localStorage.getItem('token')
+                    if (!token) {
+                      toast.error('Please log in again')
+                      return
+                    }
+
+                    const response = await fetch(
+                      `${import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'}/admin/users/${user.id}/restrict-transfer`,
+                      {
+                        method: 'PATCH',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ restricted: newValue })
+                      }
+                    )
+
+                    if (!response.ok) {
+                      const error = await response.json()
+                      throw new Error(error.error || 'Failed to update')
+                    }
+
                     toast.success(newValue ? 'Transfers restricted' : 'Transfers enabled')
-                    refetch()
-                  }).catch(() => {
-                    toast.error('Failed to update restriction')
-                  })
+                    await refetch()
+                  } catch (error: any) {
+                    console.error('Restriction update error:', error)
+                    toast.error(error.message || 'Failed to update restriction')
+                  }
                 }}
                 className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
                   user.transferRestricted ? 'bg-red-600' : 'bg-gray-300'

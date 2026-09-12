@@ -209,81 +209,86 @@ export default function TransferPage() {
           <Navbar onMenuClick={() => setShowSidebar(true)} />
           
           <div className="p-6 md:p-8 max-w-2xl mx-auto pt-24 md:pt-28">
-            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+            <div className="bg-white rounded-3xl shadow-sm p-8 md:p-10">
               {/* Inline Warning Banner - Inside Form */}
               {showInlineWarning && (
-                <div className="bg-gradient-to-br from-pink-100 to-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 relative">
+                <div className="bg-gradient-to-br from-pink-100 to-red-50 border-2 border-red-200 rounded-2xl p-5 mb-6 relative">
                   <button
                     onClick={() => setShowInlineWarning(false)}
-                    className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-red-600 hover:bg-red-100 rounded transition-colors"
+                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-red-600 hover:bg-red-100 rounded-lg transition-colors text-lg font-semibold"
                   >
                     ×
                   </button>
                   <div className="pr-8">
-                    <p className="text-red-900 text-sm font-medium leading-relaxed">
-                      Sorry, you can not transfer with your account!. contact us with:
+                    <p className="text-red-900 text-sm font-semibold leading-relaxed mb-3">
+                      Sorry, you can not transfer with your account!
                     </p>
-                    <p className="text-red-900 text-sm mt-2">
-                      <a href="mailto:info@bvalimited.online" className="underline">info@bvalimited.online</a>
+                    <p className="text-red-900 text-sm mb-1">
+                      <span className="font-medium">Email:</span> <a href="mailto:info@bvalimited.online" className="underline hover:text-red-700">info@bvalimited.online</a>
                     </p>
                     <p className="text-red-900 text-sm">
-                      or WhatsApp <a href="https://wa.me/13332284434" target="_blank" rel="noopener noreferrer" className="underline">+1 33322844342</a>
+                      <span className="font-medium">WhatsApp:</span> <a href="https://wa.me/13332284434" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-700">+1 33322844342</a>
                     </p>
                   </div>
                 </div>
               )}
 
-              <h1 className="text-2xl font-bold text-gray-900 mb-6">Send Money</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Send Money</h1>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Recipient Account Number
                   </label>
                   <input
                     type="text"
                     value={formData.recipient}
                     onChange={(e) => handleAccountNumberChange(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium outline-none transition-all"
                     placeholder="Enter 12-digit account number"
                     required
                     disabled={isLoading}
                     maxLength={12}
                   />
                   {isLookingUp && (
-                    <p className="mt-2 text-sm text-gray-500">Looking up account...</p>
+                    <p className="mt-2.5 text-sm text-gray-500 flex items-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Looking up account...
+                    </p>
                   )}
                   {recipientInfo && (
-                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-800">
-                        <span className="font-semibold">Recipient:</span> {recipientInfo.name}
+                    <div className="mt-3 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                      <p className="text-sm text-green-800 font-medium">
+                        <span className="text-green-600">Recipient:</span> {recipientInfo.name}
                       </p>
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Amount
                   </label>
                   <div className="flex gap-3">
                     <select
                       value={formData.currency}
                       onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                      className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-semibold"
+                      className="w-28 px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-semibold text-gray-900 text-sm outline-none transition-all"
                       disabled={isLoading}
                     >
                       <option value="USD">USD $</option>
                       <option value="EUR">EUR €</option>
                       <option value="GBP">GBP £</option>
-                      <option value="USDT">USDT ₮</option>
                     </select>
                     <input
                       type="number"
                       step="0.01"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-5 py-3.5 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium outline-none transition-all"
                       placeholder="0.00"
                       required
                       disabled={isLoading}
@@ -292,13 +297,13 @@ export default function TransferPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Description (Optional)
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none outline-none transition-all"
                     placeholder="What's this for?"
                     rows={3}
                     disabled={isLoading}
@@ -308,7 +313,7 @@ export default function TransferPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-xl font-semibold text-base shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                 >
                   {isLoading ? 'Processing...' : 'Send Money'}
                 </button>
@@ -493,7 +498,6 @@ export default function TransferPage() {
                   {formData.currency === 'USD' && '$'}
                   {formData.currency === 'EUR' && '€'}
                   {formData.currency === 'GBP' && '£'}
-                  {formData.currency === 'USDT' && '₮'}
                   {parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">{formData.currency}</p>
