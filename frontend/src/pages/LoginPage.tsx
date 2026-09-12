@@ -28,7 +28,13 @@ export default function LoginPage() {
       const response = await authApi.login(data.email, data.password)
       const { user, token } = response.data
       
+      // Save to Zustand store
       setAuth(user, token)
+      
+      // Also save directly to localStorage for backward compatibility
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      
       toast.success(`Welcome back, ${user.firstName}!`)
       
       // Redirect based on role

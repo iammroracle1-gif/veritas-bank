@@ -32,9 +32,29 @@ export default function TransferPage() {
 
     setIsLookingUp(true)
     try {
-      const token = localStorage.getItem('token')
+      // Try to get token from multiple sources
+      let token = localStorage.getItem('token')
+      
+      // If not in plain localStorage, check Zustand storage
+      if (!token) {
+        const authStorage = localStorage.getItem('veritas-auth')
+        if (authStorage) {
+          const parsed = JSON.parse(authStorage)
+          token = parsed.state?.token || null
+        }
+      }
+      
       console.log('Token exists:', !!token)
+      console.log('Token value:', token ? `${token.substring(0, 20)}...` : 'null')
       console.log('Lookup URL:', `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`)
+      
+      if (!token) {
+        toast.error('Please log in again')
+        setTimeout(() => {
+          navigate('/login')
+        }, 1500)
+        return
+      }
       
       const response = await axios.get(
         `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`,
@@ -55,6 +75,7 @@ export default function TransferPage() {
         setTimeout(() => {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
+          localStorage.removeItem('veritas-auth')
           navigate('/login')
         }, 2000)
       }
@@ -92,7 +113,26 @@ export default function TransferPage() {
     setIsLoading(true)
 
     try {
-      const token = localStorage.getItem('token')
+      // Try to get token from multiple sources
+      let token = localStorage.getItem('token')
+      
+      // If not in plain localStorage, check Zustand storage
+      if (!token) {
+        const authStorage = localStorage.getItem('veritas-auth')
+        if (authStorage) {
+          const parsed = JSON.parse(authStorage)
+          token = parsed.state?.token || null
+        }
+      }
+      
+      if (!token) {
+        toast.error('Please log in again')
+        setTimeout(() => {
+          navigate('/login')
+        }, 1500)
+        return
+      }
+      
       const response = await axios.post(
         `${API_URL.replace('/api', '')}/api/transactions/transfer`,
         {
