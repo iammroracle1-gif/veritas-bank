@@ -127,8 +127,6 @@ export default function NotificationsPage() {
       </div>
     )
   }
-    }
-  }
 
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(n => 
