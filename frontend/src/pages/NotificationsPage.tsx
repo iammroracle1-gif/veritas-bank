@@ -1,33 +1,129 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import { useAuthStore } from '../stores/authStore'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'
+
+interface Transaction {
+  id: string
+  transactionType: string
+  category: string
+  description: string
+  amount: number
+  currency: string
+  status: string
+  createdAt: string
+  reference: string
+}
 
 interface Notification {
   id: string
   title: string
   message: string
-  type: 'info' | 'success' | 'warning' | 'error'
+  amount: number
+  type: 'credit' | 'debit' | 'info'
   read: boolean
   createdAt: Date
+  reference: string
 }
 
 export default function NotificationsPage() {
   const navigate = useNavigate()
   const { logout } = useAuthStore()
   const [showSidebar, setShowSidebar] = useState(false)
-  
-  // Mock notifications - will be replaced with real data
   const [notifications, setNotifications] = useState<Notification[]>([])
+
+  // Fetch transactions
+  const { data: transactionsData, isLoading } = useQuery({
+    queryKey: ['notifications-transactions'],
+    queryFn: async () => {
+      // Get token from localStorage
+      let token = localStorage.getItem('token')
+      if (!token) {
+        const authStorage = localStorage.getItem('veritas-auth')
+        if (authStorage) {
+          const parsed = JSON.parse(authStorage)
+          token = parsed.state?.token || null
+        }
+      }
+
+      if (!token) {
+        throw new Error('No token found')
+      }
+
+      const response = await axios.get(`${API_URL}/transactions?limit=50`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      return response.data.transactions
+    },
+    refetchInterval: 10000, // Refetch every 10 seconds
+  })
+
+  // Convert transactions to notifications
+  useEffect(() => {
+    if (transactionsData) {
+      const notifs: Notification[] = transactionsData.map((txn: Transaction) => {
+        const isCredit = txn.amount > 0
+        const type: 'credit' | 'debit' | 'info' = isCredit ? 'credit' : 'debit'
+        
+        let title = ''
+        let message = ''
+
+        if (isCredit) {
+          if (txn.category === 'Deposit' || txn.transactionType === 'CREDIT') {
+            title = 'Money Received'
+            message = `You received $${Math.abs(txn.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          } else if (txn.transactionType === 'TRANSFER_IN') {
+            title = 'Transfer Received'
+            message = `You received $${Math.abs(txn.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - ${txn.description || 'Transfer'}`
+          } else {
+            title = 'Credit'
+            message = `$${Math.abs(txn.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} credited to your account`
+          }
+        } else {
+          if (txn.transactionType === 'TRANSFER_OUT') {
+            title = 'Transfer Sent'
+            message = `You sent $${Math.abs(txn.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - ${txn.description || 'Transfer'}`
+          } else if (txn.transactionType === 'WITHDRAWAL') {
+            title = 'Withdrawal'
+            message = `You withdrew $${Math.abs(txn.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          } else {
+            title = 'Debit'
+            message = `$${Math.abs(txn.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} debited from your account`
+          }
+        }
+
+        if (txn.description && txn.description !== message) {
+          message = `${message} - ${txn.description}`
+        }
+
+        return {
+          id: txn.id,
+          title,
+          message,
+          amount: txn.amount,
+          type,
+          read: false, // Can be tracked separately if needed
+          createdAt: new Date(txn.createdAt),
+          reference: txn.reference,
+        }
+      })
+
+      setNotifications(notifs)
+    }
+  }, [transactionsData])
 
   const getIconColor = (type: string) => {
     switch (type) {
-      case 'success':
+      case 'credit':
         return 'bg-green-100 text-green-600'
-      case 'warning':
-        return 'bg-amber-100 text-amber-600'
-      case 'error':
+      case 'debit':
         return 'bg-red-100 text-red-600'
       default:
         return 'bg-blue-100 text-blue-600'
@@ -35,31 +131,24 @@ export default function NotificationsPage() {
   }
 
   const getIcon = (type: string) => {
-    switch (type) {
-      case 'success':
-        return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        )
-      case 'warning':
-        return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        )
-      case 'error':
-        return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        )
-      default:
-        return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        )
+    if (type === 'credit') {
+      return (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      )
+    } else if (type === 'debit') {
+      return (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+        </svg>
+      )
+    } else {
+      return (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
     }
   }
 
@@ -102,8 +191,14 @@ export default function NotificationsPage() {
             )}
           </div>
 
-          {/* Notifications List */}
-          {notifications.length > 0 ? (
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading notifications...</p>
+            </div>
+          ) : notifications.length > 0 ? (
+            /* Notifications List */
             <div className="space-y-2">
               {notifications.map((notification) => (
                 <div
@@ -132,14 +227,19 @@ export default function NotificationsPage() {
                       <p className="text-sm text-gray-600 mb-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(notification.createdAt).toLocaleString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-gray-400">
+                          {new Date(notification.createdAt).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        <p className="text-xs text-gray-400 font-mono">
+                          {notification.reference}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
