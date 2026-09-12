@@ -1,9 +1,9 @@
 interface NavbarProps {
   onMenuClick: () => void
+  notificationCount?: number
 }
 
-export default function Navbar({ onMenuClick }: NavbarProps) {
-  const notificationCount = 0 // Real notification count - will be implemented
+export default function Navbar({ onMenuClick, notificationCount = 0 }: NavbarProps) {
 
   return (
     <header className="bg-[#1e3a5f] fixed top-0 left-0 right-0 z-30 lg:left-72">

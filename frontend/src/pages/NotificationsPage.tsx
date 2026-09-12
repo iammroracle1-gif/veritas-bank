@@ -83,19 +83,8 @@ export default function NotificationsPage() {
         <Navbar onMenuClick={() => setShowSidebar(true)} />
         
         <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto pt-20 md:pt-24">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="text-blue-600 hover:text-blue-700 mb-3 flex items-center gap-2 text-sm font-medium"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back
-              </button>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Notifications</h1>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
               {unreadCount > 0 && (
                 <p className="text-sm text-gray-600 mt-1">{unreadCount} unread</p>
               )}

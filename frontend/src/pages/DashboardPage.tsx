@@ -24,10 +24,22 @@ export default function DashboardPage() {
   console.log('Dashboard response:', dashboardData)
   console.log('Balance:', dashboardData?.data?.data?.balance)
 
+  // Format number with commas
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
   const balance = dashboardData?.data?.data?.balance || 0
   const recentTransactions = dashboardData?.data?.data?.recentTransactions || []
   const accountNumber = user?.accountNumber || 'N/A'
   const userName = user ? `${user.firstName} ${user.lastName}` : ''
+  
+  // Count unread notifications (recent credits in last 24 hours)
+  const notificationCount = recentTransactions.filter((t: any) => {
+    const isRecent = new Date(t.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const isCredit = t.amount > 0
+    return isRecent && isCredit
+  }).length
 
   const copyAccountDetails = () => {
     const details = `${userName}\n${accountNumber}`
@@ -58,7 +70,7 @@ export default function DashboardPage() {
         <Sidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} onLogout={handleLogout} />
         
         <main className="flex-1 lg:ml-72 overflow-auto bg-gray-50">
-          <Navbar onMenuClick={() => setShowSidebar(true)} />
+          <Navbar onMenuClick={() => setShowSidebar(true)} notificationCount={notificationCount} />
           
           <div className="p-6 md:p-8 max-w-5xl mx-auto pt-24 md:pt-28">
             {/* Balance Cards */}
@@ -84,7 +96,7 @@ export default function DashboardPage() {
               {/* USD Balance Card */}
               <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
                 <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">USD Balance</p>
-                <p className="text-gray-900 text-3xl md:text-4xl font-bold">${balance.toFixed(2)}</p>
+                <p className="text-gray-900 text-3xl md:text-4xl font-bold">${formatNumber(balance)}</p>
               </div>
 
               {/* EUR Balance Card */}
@@ -174,7 +186,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                       <span className={`font-bold text-lg ${transaction.amount >= 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                        {transaction.amount >= 0 ? '+' : ''}{transaction.currency === 'USD' ? '$' : ''}{Math.abs(transaction.amount).toFixed(2)}
+                        {transaction.amount >= 0 ? '+' : ''}{transaction.currency === 'USD' ? '$' : ''}{formatNumber(Math.abs(transaction.amount))}
                       </span>
                     </div>
                   ))

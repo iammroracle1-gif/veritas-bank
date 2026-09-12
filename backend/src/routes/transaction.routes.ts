@@ -45,14 +45,23 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 // Lookup account by account number
 router.get('/lookup-account/:accountNumber', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { accountNumber: req.params.accountNumber },
+    const accountNumber = req.params.accountNumber.trim();
+    
+    console.log('Looking up account:', accountNumber);
+    
+    const user = await prisma.user.findFirst({
+      where: { 
+        accountNumber: accountNumber,
+        role: 'USER' // Only lookup user accounts, not admin
+      },
       select: {
         firstName: true,
         lastName: true,
         accountNumber: true,
       },
     });
+
+    console.log('Found user:', user);
 
     if (!user) {
       return res.status(404).json({ error: 'Account not found' });
@@ -63,6 +72,7 @@ router.get('/lookup-account/:accountNumber', authenticateToken, async (req: Auth
       accountNumber: user.accountNumber,
     });
   } catch (error) {
+    console.error('Lookup error:', error);
     res.status(500).json({ error: 'Failed to lookup account' });
   }
 });
