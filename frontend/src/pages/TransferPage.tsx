@@ -7,7 +7,7 @@ import TransferRestrictionModal from '../components/TransferRestrictionModal'
 import { useAuthStore } from '../stores/authStore'
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com'
+const API_URL = import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'
 
 export default function TransferPage() {
   const navigate = useNavigate()
@@ -34,7 +34,7 @@ export default function TransferPage() {
     try {
       const token = localStorage.getItem('token')
       const response = await axios.get(
-        `${API_URL}/api/transactions/lookup-account/${accountNumber}`,
+        `${API_URL}/transactions/lookup-account/${accountNumber}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ export default function TransferPage() {
     try {
       const token = localStorage.getItem('token')
       const response = await axios.post(
-        `${API_URL}/api/transactions/transfer`,
+        `${API_URL}/transactions/transfer`,
         {
           recipientAccountNumber: formData.recipient,
           amount: amount,
