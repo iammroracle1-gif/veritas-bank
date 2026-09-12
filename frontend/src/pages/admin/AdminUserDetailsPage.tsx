@@ -24,28 +24,37 @@ export default function AdminUserDetailsPage() {
   } = useForm<BalanceAdjustmentForm>()
 
   // Fetch user details with real-time sync
-  const { data: userData, isLoading } = useQuery({
+  const { data: userData, isLoading, refetch } = useQuery({
     queryKey: ['admin-user', id],
     queryFn: () => adminApi.getUserDetails(id!),
     enabled: !!id,
     refetchInterval: 3000, // Refetch every 3 seconds for real-time sync
+    staleTime: 0, // Always consider data stale
+    cacheTime: 0, // Don't cache
   })
 
   const user = userData?.data
+
+  // Debug logging
+  console.log('User data:', user)
+  console.log('Account balance:', user?.account?.balance)
 
   // Adjust balance mutation
   const adjustBalanceMutation = useMutation({
     mutationFn: (data: BalanceAdjustmentForm) =>
       adminApi.adjustBalance(id!, data.amount, data.reason, data.description),
-    onSuccess: () => {
+    onSuccess: async (response) => {
+      console.log('Balance adjustment response:', response.data)
       toast.success('Balance updated successfully!')
-      queryClient.invalidateQueries({ queryKey: ['admin-user', id] })
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
+      
+      // Force immediate refetch with cache bypass
+      await refetch()
+      
       reset()
       setShowAdjustModal(false)
     },
     onError: (error: any) => {
+      console.error('Balance adjustment error:', error)
       toast.error(error.response?.data?.error || 'Failed to adjust balance')
     },
   })
