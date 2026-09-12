@@ -8,6 +8,7 @@ import transactionRoutes from './routes/transaction.routes';
 import currencyRoutes from './routes/currency.routes';
 import supportRoutes from './routes/support.routes';
 import savingsRoutes from './routes/savings.routes';
+import seedRoutes from './routes/seed.routes';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/currencies', currencyRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/savings', savingsRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
