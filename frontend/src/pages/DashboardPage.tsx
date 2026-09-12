@@ -21,10 +21,11 @@ export default function DashboardPage() {
     cacheTime: 0, // Don't cache
   })
 
-  console.log('Dashboard data:', dashboardData)
-  console.log('Balance from data:', dashboardData?.data?.balance)
+  console.log('Dashboard response:', dashboardData)
+  console.log('Balance:', dashboardData?.data?.data?.balance)
 
-  const balance = dashboardData?.data?.balance || 0
+  const balance = dashboardData?.data?.data?.balance || 0
+  const recentTransactions = dashboardData?.data?.data?.recentTransactions || []
   const accountNumber = user?.accountNumber || 'N/A'
   const userName = user ? `${user.firstName} ${user.lastName}` : ''
 
@@ -159,8 +160,8 @@ export default function DashboardPage() {
                 </button>
               </div>
               <div className="space-y-1">
-                {dashboardData?.data?.recentTransactions && dashboardData.data.recentTransactions.length > 0 ? (
-                  dashboardData.data.recentTransactions.map((transaction: any) => (
+                {recentTransactions && recentTransactions.length > 0 ? (
+                  recentTransactions.map((transaction: any) => (
                     <div key={transaction.id} className="flex justify-between items-center py-4 border-b border-gray-100 last:border-0">
                       <div>
                         <p className="text-gray-900 font-semibold text-base">{transaction.description}</p>
