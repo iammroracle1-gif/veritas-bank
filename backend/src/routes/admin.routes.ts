@@ -236,35 +236,43 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
   const { amount, reason, description } = req.body;
 
   try {
-    const account = await prisma.account.findUnique({
-      where: { userId: req.params.id },
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: { account: true },
     });
 
-    if (!account) {
-      return res.status(404).json({ error: 'Account not found' });
+    if (!user || !user.account) {
+      return res.status(404).json({ error: 'User or account not found' });
     }
 
-    const newBalance = Number(account.balance) + Number(amount);
+    const newBalance = Number(user.account.balance) + Number(amount);
 
-    const transaction = await prisma.transaction.create({
-      data: {
-        userId: req.params.id,
-        reference: generateTransactionReference(),
-        transactionType: 'ADMIN_ADJUSTMENT',
-        category: 'Admin Adjustment',
-        description: description || reason,
-        amount: Number(amount),
-        currency: 'USD',
-        status: 'COMPLETED',
-        previousBalance: account.balance,
-        resultingBalance: newBalance,
-        createdBy: req.user!.id,
-      },
-    });
+    // Use transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx) => {
+      // Create transaction record
+      const transaction = await tx.transaction.create({
+        data: {
+          userId: req.params.id,
+          reference: generateTransactionReference(),
+          transactionType: 'ADMIN_ADJUSTMENT',
+          category: 'Admin Adjustment',
+          description: description || reason,
+          amount: Number(amount),
+          currency: 'USD',
+          status: 'COMPLETED',
+          previousBalance: user.account!.balance,
+          resultingBalance: newBalance,
+          createdBy: req.user!.id,
+        },
+      });
 
-    await prisma.account.update({
-      where: { userId: req.params.id },
-      data: { balance: newBalance },
+      // Update account balance
+      const updatedAccount = await tx.account.update({
+        where: { userId: req.params.id },
+        data: { balance: newBalance },
+      });
+
+      return { transaction, updatedAccount };
     });
 
     // Log audit
@@ -273,7 +281,7 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
         adminId: req.user!.id,
         action: 'BALANCE_ADJUSTMENT',
         targetUserId: req.params.id,
-        oldValue: account.balance.toString(),
+        oldValue: user.account.balance.toString(),
         newValue: newBalance.toString(),
         reason: reason || 'Manual adjustment',
         ipAddress: req.ip,
@@ -283,8 +291,8 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
 
     res.json({
       message: 'Balance adjusted successfully',
-      transaction,
-      newBalance,
+      transaction: result.transaction,
+      newBalance: result.updatedAccount.balance,
     });
   } catch (error) {
     console.error('Balance adjustment error:', error);

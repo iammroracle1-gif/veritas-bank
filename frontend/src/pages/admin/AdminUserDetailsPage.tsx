@@ -161,14 +161,13 @@ export default function AdminUserDetailsPage() {
         <div className="space-y-4">
           {/* Balance Card - iOS Style */}
           <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white shadow-lg">
-            <p className="text-sm opacity-90 mb-2">Account Balance</p>
-            <p className="text-4xl font-bold mb-4">${(user.account?.balance || 0).toFixed(2)}</p>
-            <p className="text-sm opacity-75">{user.account?.baseCurrency || 'USD'}</p>
+            <p className="text-sm opacity-90 mb-2">Balance</p>
+            <p className="text-4xl font-bold">${(user.account?.balance || 0).toFixed(2)}</p>
           </div>
 
           {/* Account Details Card */}
           <div className="bg-white rounded-3xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Account Details</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Details</h3>
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Account Number</p>
@@ -187,28 +186,13 @@ export default function AdminUserDetailsPage() {
                 <p className="text-sm font-medium text-gray-900">{user.phone || 'Not provided'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-1">Role</p>
-                <p className="text-sm font-medium text-gray-900">{user.role}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Member Since</p>
+                <p className="text-xs text-gray-500 mb-1">Joined</p>
                 <p className="text-sm font-medium text-gray-900">
                   {new Date(user.createdAt).toLocaleDateString('en-US', { 
-                    month: 'long', 
+                    month: 'short', 
                     day: 'numeric',
                     year: 'numeric' 
                   })}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Last Login</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {user.lastLogin ? new Date(user.lastLogin).toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  }) : 'Never'}
                 </p>
               </div>
             </div>
@@ -216,7 +200,7 @@ export default function AdminUserDetailsPage() {
 
           {/* Status Change Card */}
           <div className="bg-white rounded-3xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Account Status</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Status</h3>
             <select
               value={user.accountStatus}
               onChange={(e) => updateStatusMutation.mutate(e.target.value)}

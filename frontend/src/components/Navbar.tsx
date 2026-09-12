@@ -23,8 +23,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           </h1>
         </div>
 
-        {/* Right: Notification Bell & Menu */}
-        <div className="flex items-center space-x-3">
+        {/* Right: Notification Bell */}
+        <div className="flex items-center">
           {/* Notification Bell with Badge */}
           <a
             href="/dashboard/notifications"
@@ -40,22 +40,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
               </span>
             )}
           </a>
-
-          {/* User Avatar (Small) */}
-          <button className="relative">
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </button>
-
-          {/* More Options Menu */}
-          <button className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-            </svg>
-          </button>
         </div>
       </div>
     </header>
