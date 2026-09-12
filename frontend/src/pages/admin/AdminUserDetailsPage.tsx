@@ -77,6 +77,10 @@ export default function AdminUserDetailsPage() {
     adjustBalanceMutation.mutate(data)
   }
 
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -168,7 +172,7 @@ export default function AdminUserDetailsPage() {
           {/* Balance Card - iOS Style */}
           <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white shadow-lg">
             <p className="text-sm opacity-90 mb-2">Balance</p>
-            <p className="text-4xl font-bold">${(user.account?.balance || 0).toFixed(2)}</p>
+            <p className="text-4xl font-bold">${formatNumber(user.account?.balance || 0)}</p>
           </div>
 
           {/* Account Details Card */}
@@ -262,7 +266,7 @@ export default function AdminUserDetailsPage() {
                       </div>
                       <div className="text-right">
                         <p className={`text-sm font-bold ${isCredit ? 'text-green-600' : 'text-gray-900'}`}>
-                          {isCredit ? '+' : ''}{txn.currency === 'USD' ? '$' : ''}{Math.abs(txn.amount).toFixed(2)}
+                          {isCredit ? '+' : ''}{txn.currency === 'USD' ? '$' : ''}{formatNumber(Math.abs(txn.amount))}
                         </p>
                         <p className="text-xs text-gray-500">{txn.reference}</p>
                       </div>
@@ -308,7 +312,7 @@ export default function AdminUserDetailsPage() {
               {/* Current Balance Display */}
               <div className="bg-blue-50 rounded-2xl p-4 text-center">
                 <p className="text-xs text-blue-600 mb-1">Current Balance</p>
-                <p className="text-2xl font-bold text-blue-900">${(user.account?.balance || 0).toFixed(2)}</p>
+                <p className="text-2xl font-bold text-blue-900">${formatNumber(user.account?.balance || 0)}</p>
               </div>
 
               <div>

@@ -34,7 +34,7 @@ export default function TransferPage() {
     try {
       const token = localStorage.getItem('token')
       const response = await axios.get(
-        `${API_URL}/transactions/lookup-account/${accountNumber}`,
+        `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ export default function TransferPage() {
     try {
       const token = localStorage.getItem('token')
       const response = await axios.post(
-        `${API_URL}/transactions/transfer`,
+        `${API_URL.replace('/api', '')}/api/transactions/transfer`,
         {
           recipientAccountNumber: formData.recipient,
           amount: amount,

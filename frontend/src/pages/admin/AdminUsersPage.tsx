@@ -227,7 +227,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-bold text-green-600">
-                          ${(user.account?.balance || 0).toFixed(2)}
+                          ${((user.account?.balance || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

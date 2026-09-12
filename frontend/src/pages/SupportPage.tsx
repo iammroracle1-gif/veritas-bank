@@ -17,13 +17,6 @@ export default function SupportPage() {
         <Navbar onMenuClick={() => setShowSidebar(true)} />
         
         <div className="p-6 md:p-8 max-w-4xl mx-auto pt-24 md:pt-28">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-blue-600 hover:text-blue-700 mb-6 flex items-center gap-2"
-          >
-            ← Back to Dashboard
-          </button>
-
           <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Support</h1>
             

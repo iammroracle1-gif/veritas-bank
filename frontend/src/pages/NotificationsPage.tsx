@@ -83,8 +83,10 @@ export default function NotificationsPage() {
         <Navbar onMenuClick={() => setShowSidebar(true)} />
         
         <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto pt-20 md:pt-24">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Notifications</h1>
               {unreadCount > 0 && (
                 <p className="text-sm text-gray-600 mt-1">{unreadCount} unread</p>
               )}
