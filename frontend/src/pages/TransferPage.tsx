@@ -33,6 +33,9 @@ export default function TransferPage() {
     setIsLookingUp(true)
     try {
       const token = localStorage.getItem('token')
+      console.log('Token exists:', !!token)
+      console.log('Lookup URL:', `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`)
+      
       const response = await axios.get(
         `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`,
         {
@@ -43,9 +46,17 @@ export default function TransferPage() {
       )
       setRecipientInfo({ name: response.data.name })
     } catch (error: any) {
+      console.error('Lookup error:', error.response?.status, error.response?.data)
       setRecipientInfo(null)
       if (error.response?.status === 404) {
         toast.error('Account not found')
+      } else if (error.response?.status === 403 || error.response?.status === 401) {
+        toast.error('Session expired. Please log in again.')
+        setTimeout(() => {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          navigate('/login')
+        }, 2000)
       }
     } finally {
       setIsLookingUp(false)
