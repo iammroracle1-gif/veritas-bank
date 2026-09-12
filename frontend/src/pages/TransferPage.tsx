@@ -121,7 +121,25 @@ export default function TransferPage() {
       return
     }
 
-    setShowPinOverlay(true)
+    // Check if user has PIN before showing PIN overlay
+    try {
+      const token = localStorage.getItem('token') || JSON.parse(localStorage.getItem('veritas-auth') || '{}').state?.token
+      const response = await axios.get(`${API_URL}/pin/check`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      
+      if (!response.data.hasPin) {
+        // No PIN set, show setup modal
+        setShowPinSetup(true)
+        return
+      }
+      
+      // Has PIN, show PIN entry overlay
+      setShowPinOverlay(true)
+    } catch (error) {
+      console.error('PIN check error:', error)
+      toast.error('Failed to verify PIN status')
+    }
   }
 
   const handlePinSubmit = async () => {
@@ -181,10 +199,12 @@ export default function TransferPage() {
       }, 4000)
     } catch (error: any) {
       console.error('Transfer error:', error)
+      setIsLoading(false)
       
       // Check for PIN_NOT_SET error
       if (error.response?.data?.error === 'PIN_NOT_SET') {
         setShowPinSetup(true)
+        setPin(['', '', '', ''])
         return
       }
       
@@ -204,8 +224,6 @@ export default function TransferPage() {
       } else {
         toast.error('Transfer failed. Please try again.')
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -385,7 +403,11 @@ export default function TransferPage() {
           onClose={() => setShowPinSetup(false)}
           onSuccess={() => {
             setShowPinSetup(false)
-            toast.success('PIN created! You can now proceed with your transfer.')
+            toast.success('PIN created successfully!')
+            // Show PIN entry overlay after setup
+            setTimeout(() => {
+              setShowPinOverlay(true)
+            }, 500)
           }}
         />
       )}
