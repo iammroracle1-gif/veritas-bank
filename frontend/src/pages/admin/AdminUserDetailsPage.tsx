@@ -33,10 +33,11 @@ export default function AdminUserDetailsPage() {
     cacheTime: 0, // Don't cache
   })
 
-  const user = userData?.data
+  const user = userData?.data?.data || userData?.data
 
   // Debug logging
-  console.log('User data:', user)
+  console.log('User data:', userData)
+  console.log('User object:', user)
   console.log('Account balance:', user?.account?.balance)
 
   // Adjust balance mutation
