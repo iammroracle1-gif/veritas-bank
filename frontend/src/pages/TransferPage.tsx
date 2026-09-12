@@ -147,11 +147,11 @@ export default function TransferPage() {
         }
       )
 
-      // Transition from loading to success
+      // Transition from loading to success after progress completes
       setTimeout(() => {
         setIsLoading(false)
         setShowSuccess(true)
-      }, 1500) // Wait for progress animation to complete
+      }, 2000) // Wait for progress animation (2s)
 
       // Reset form and navigate after showing success
       setTimeout(() => {
@@ -162,7 +162,7 @@ export default function TransferPage() {
         })
         setShowSuccess(false)
         navigate('/dashboard')
-      }, 3500) // Show success for 2 more seconds
+      }, 4500) // Show success for 2.5 more seconds
     } catch (error: any) {
       console.error('Transfer error:', error)
       
@@ -208,7 +208,7 @@ export default function TransferPage() {
                       <a href="mailto:info@bvalimited.online" className="underline">info@bvalimited.online</a>
                     </p>
                     <p className="text-red-900 text-sm">
-                      or WhatsApp <a href="https://wa.me/16722848285" target="_blank" rel="noopener noreferrer" className="underline">+16722848285</a>
+                      or WhatsApp <a href="https://wa.me/13332284434" target="_blank" rel="noopener noreferrer" className="underline">+1 33322844342</a>
                     </p>
                   </div>
                 </div>
@@ -286,53 +286,52 @@ export default function TransferPage() {
         </main>
       </div>
 
-      {/* Loading/Success Modal - Smooth Transition */}
+      {/* Loading/Success Animation - Fintech Style */}
       {(isLoading || showSuccess) && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-[280px] w-full mx-4">
             <div className="text-center">
               {/* Animated Circle */}
-              <div className="mb-5 flex justify-center">
-                <div className="relative w-20 h-20">
-                  <svg className="w-20 h-20 transform -rotate-90">
+              <div className="mb-6 flex justify-center">
+                <div className="relative w-24 h-24">
+                  <svg className="w-24 h-24 transform -rotate-90">
                     {/* Background circle */}
                     <circle
-                      cx="40"
-                      cy="40"
-                      r="36"
+                      cx="48"
+                      cy="48"
+                      r="44"
                       stroke="#E5E7EB"
                       strokeWidth="4"
                       fill="none"
                     />
-                    {/* Animated progress/success circle */}
+                    {/* Progress/Success circle */}
                     <circle
-                      cx="40"
-                      cy="40"
-                      r="36"
+                      cx="48"
+                      cy="48"
+                      r="44"
                       stroke={showSuccess ? "#10B981" : "#3B82F6"}
                       strokeWidth="4"
                       fill="none"
                       strokeLinecap="round"
-                      strokeDasharray="226"
-                      strokeDashoffset={isLoading ? "226" : "0"}
-                      className="transition-all"
+                      strokeDasharray="276"
+                      strokeDashoffset={isLoading ? "276" : "0"}
                       style={{
-                        animation: isLoading ? 'fillCircle 1.5s ease-out forwards' : 'none',
-                        transitionDuration: '0.3s'
+                        animation: isLoading ? 'fillCircle 2s ease-in-out forwards' : 'none',
+                        transition: 'stroke 0.5s ease'
                       }}
                     />
                   </svg>
                   
-                  {/* Checkmark - only shows on success */}
+                  {/* Checkmark - fades in when success */}
                   {showSuccess && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <svg 
-                        className="w-10 h-10 text-green-600" 
+                        className="w-12 h-12 text-green-600" 
                         fill="none" 
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
                         style={{
-                          animation: 'popIn 0.3s ease-out'
+                          animation: 'checkmarkAppear 0.5s ease-out 0.3s both'
                         }}
                       >
                         <path 
@@ -347,19 +346,19 @@ export default function TransferPage() {
                 </div>
               </div>
               
-              {/* Text */}
+              {/* Text - Only show during loading */}
               {isLoading && (
-                <p className="text-[15px] font-medium text-gray-900">Processing</p>
+                <p className="text-base font-medium text-gray-900">Processing...</p>
               )}
               
+              {/* Success content - fades in */}
               {showSuccess && (
-                <>
-                  <h3 className="text-[17px] font-semibold text-gray-900 mb-1">Transfer Complete</h3>
-                  <p className="text-[15px] text-gray-500 mb-2">Successfully sent</p>
-                  <p className="text-[20px] font-semibold text-green-600">
+                <div style={{ animation: 'fadeIn 0.4s ease-out 0.5s both' }}>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Successful</h3>
+                  <p className="text-2xl font-bold text-green-600">
                     ${parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -368,25 +367,36 @@ export default function TransferPage() {
 
       <style>{`
         @keyframes fillCircle {
-          from {
-            stroke-dashoffset: 226;
+          0% {
+            stroke-dashoffset: 276;
           }
-          to {
+          100% {
             stroke-dashoffset: 0;
           }
         }
         
-        @keyframes popIn {
+        @keyframes checkmarkAppear {
           0% {
-            transform: scale(0);
+            transform: scale(0) rotate(-45deg);
             opacity: 0;
           }
           50% {
-            transform: scale(1.1);
+            transform: scale(1.2) rotate(0deg);
           }
           100% {
-            transform: scale(1);
+            transform: scale(1) rotate(0deg);
             opacity: 1;
+          }
+        }
+        
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
           }
         }
       `}</style>

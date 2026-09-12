@@ -150,18 +150,12 @@ router.post('/transfer', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Sender account not found' });
     }
 
-    // Check if sender has reached transfer limit (restrict on 3rd transfer, not 2nd)
-    if (sender.transferCount >= 2) {
+    // Check if transfers are restricted by admin
+    if (sender.transferRestricted) {
       return res.status(403).json({ 
         error: 'TRANSFER_LIMIT_REACHED',
-        message: 'You have reached your transfer limit. Please contact support.',
-        transferCount: sender.transferCount
+        message: 'Your transfers have been restricted. Please contact support.'
       });
-    }
-
-    // Check if transfers are restricted
-    if (sender.transferRestricted) {
-      return res.status(403).json({ error: 'Transfers are restricted for this account' });
     }
 
     // Check balance
