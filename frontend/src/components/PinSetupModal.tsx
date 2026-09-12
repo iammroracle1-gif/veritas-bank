@@ -12,7 +12,7 @@ interface PinSetupModalProps {
 export default function PinSetupModal({ onClose, onSuccess }: PinSetupModalProps) {
   const [pin, setPin] = useState(['', '', '', ''])
   const [confirmPin, setConfirmPin] = useState(['', '', '', ''])
-  const [step, setStep] = useState<'create' | 'confirm'>('create')
+  const [step, setStep] = useState<'info' | 'create' | 'confirm'>('info')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handlePinChange = (index: number, value: string, isConfirm = false) => {
@@ -92,54 +92,14 @@ export default function PinSetupModal({ onClose, onSuccess }: PinSetupModalProps
             </svg>
           </div>
 
-          <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-            {step === 'create' ? 'Create Transaction PIN' : 'Confirm Your PIN'}
-          </h3>
-          <p className="text-sm text-gray-500 mb-6">
-            {step === 'create' 
-              ? 'Set a 4-digit PIN to secure your transactions'
-              : 'Re-enter your PIN to confirm'}
-          </p>
-
-          {/* PIN Input */}
-          {step === 'create' ? (
-            <div className="flex justify-center gap-3 mb-6">
-              {pin.map((digit, index) => (
-                <input
-                  key={index}
-                  type="password"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handlePinChange(index, e.target.value, false)}
-                  onKeyDown={(e) => handleKeyDown(e, index, false)}
-                  id={`pin-${index}`}
-                  className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                  autoFocus={index === 0}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex justify-center gap-3 mb-6">
-              {confirmPin.map((digit, index) => (
-                <input
-                  key={index}
-                  type="password"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handlePinChange(index, e.target.value, true)}
-                  onKeyDown={(e) => handleKeyDown(e, index, true)}
-                  id={`confirm-${index}`}
-                  className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                  autoFocus={index === 0}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Buttons */}
-          <div className="flex gap-3">
-            {step === 'create' ? (
-              <>
+          {step === 'info' ? (
+            <>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">Create Transaction PIN</h3>
+              <p className="text-base text-gray-600 mb-6 leading-relaxed">
+                You need to create a 4-digit PIN first to secure your transactions. This PIN will be stored safely and used for all future transfers.
+              </p>
+              
+              <div className="flex gap-3">
                 <button
                   onClick={onClose}
                   className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
@@ -147,33 +107,99 @@ export default function PinSetupModal({ onClose, onSuccess }: PinSetupModalProps
                   Cancel
                 </button>
                 <button
-                  onClick={handleContinue}
+                  onClick={() => setStep('create')}
                   className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  Continue
+                  Create PIN
                 </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => {
-                    setStep('create')
-                    setConfirmPin(['', '', '', ''])
-                  }}
-                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Creating...' : 'Confirm'}
-                </button>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                {step === 'create' ? 'Enter Your PIN' : 'Confirm Your PIN'}
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                {step === 'create' 
+                  ? 'Create a 4-digit PIN to secure your transactions'
+                  : 'Re-enter your PIN to confirm'}
+              </p>
+
+              {/* PIN Input */}
+              {step === 'create' ? (
+                <div className="flex justify-center gap-3 mb-6">
+                  {pin.map((digit, index) => (
+                    <input
+                      key={index}
+                      type="password"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handlePinChange(index, e.target.value, false)}
+                      onKeyDown={(e) => handleKeyDown(e, index, false)}
+                      id={`pin-${index}`}
+                      className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                      autoFocus={index === 0}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex justify-center gap-3 mb-6">
+                  {confirmPin.map((digit, index) => (
+                    <input
+                      key={index}
+                      type="password"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handlePinChange(index, e.target.value, true)}
+                      onKeyDown={(e) => handleKeyDown(e, index, true)}
+                      id={`confirm-${index}`}
+                      className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                      autoFocus={index === 0}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                {step === 'create' ? (
+                  <>
+                    <button
+                      onClick={onClose}
+                      className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleContinue}
+                      className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      Continue
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setStep('create')
+                        setConfirmPin(['', '', '', ''])
+                      }}
+                      className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Creating...' : 'Confirm'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

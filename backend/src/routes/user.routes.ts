@@ -84,6 +84,7 @@ router.get('/dashboard', authenticateToken, async (req: AuthRequest, res) => {
     res.json({
       data: {
         balance: user?.account?.balance || 0,
+        accountNumber: user?.accountNumber || '',
         recentTransactions: user?.transactions || [],
         savingsGoals: user?.savingsGoals || [],
         transactionCount,

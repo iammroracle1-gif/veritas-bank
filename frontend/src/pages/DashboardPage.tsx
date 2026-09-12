@@ -31,7 +31,8 @@ export default function DashboardPage() {
 
   const balance = dashboardData?.data?.data?.balance || 0
   const recentTransactions = dashboardData?.data?.data?.recentTransactions || []
-  const accountNumber = user?.accountNumber || 'N/A'
+  // Get account number from API response (fresh data) or fallback to cached user data
+  const accountNumber = dashboardData?.data?.data?.accountNumber || user?.accountNumber || 'N/A'
   const userName = user ? `${user.firstName} ${user.lastName}` : ''
   
   // Count unread notifications (recent credits in last 24 hours)

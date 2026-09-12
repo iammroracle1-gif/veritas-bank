@@ -14,6 +14,7 @@ import TransactionsPage from './pages/TransactionsPage'
 import ProfilePage from './pages/ProfilePage'
 import SavingsPage from './pages/SavingsPage'
 import SupportPage from './pages/SupportPage'
+import SettingsPage from './pages/SettingsPage'
 import NotificationsPage from './pages/NotificationsPage'
 
 // Admin Pages
@@ -114,6 +115,14 @@ function App() {
           element={
             <ProtectedRoute>
               <SupportPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />
