@@ -9,6 +9,7 @@ import currencyRoutes from './routes/currency.routes';
 import supportRoutes from './routes/support.routes';
 import savingsRoutes from './routes/savings.routes';
 import seedRoutes from './routes/seed.routes';
+import pinRoutes from './routes/pin.routes';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/currencies', currencyRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/savings', savingsRoutes);
 app.use('/api/seed', seedRoutes);
+app.use('/api/pin', pinRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {

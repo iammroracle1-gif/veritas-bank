@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
+import PinSetupModal from '../components/PinSetupModal'
 import { useAuthStore } from '../stores/authStore'
 import axios from 'axios'
 
@@ -13,6 +14,7 @@ export default function TransferPage() {
   const { logout } = useAuthStore()
   const [showSidebar, setShowSidebar] = useState(false)
   const [showInlineWarning, setShowInlineWarning] = useState(false)
+  const [showPinSetup, setShowPinSetup] = useState(false)
   const [showPinOverlay, setShowPinOverlay] = useState(false)
   const [pin, setPin] = useState(['', '', '', ''])
   const [isLoading, setIsLoading] = useState(false)
@@ -28,6 +30,23 @@ export default function TransferPage() {
     currency: 'USD',
   })
 
+  // Check if user has PIN on mount
+  useEffect(() => {
+    checkPinStatus()
+  }, [])
+
+  const checkPinStatus = async () => {
+    try {
+      const token = localStorage.getItem('token') || JSON.parse(localStorage.getItem('veritas-auth') || '{}').state?.token
+      const response = await axios.get(`${API_URL}/pin/check`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      // If no PIN, we'll show setup modal when they try to transfer
+    } catch (error) {
+      console.error('Check PIN error:', error)
+    }
+  }
+
   // Lookup recipient account
   const lookupAccount = async (accountNumber: string) => {
     if (!accountNumber || accountNumber.length < 10) {
@@ -37,10 +56,8 @@ export default function TransferPage() {
 
     setIsLookingUp(true)
     try {
-      // Try to get token from multiple sources
       let token = localStorage.getItem('token')
       
-      // If not in plain localStorage, check Zustand storage
       if (!token) {
         const authStorage = localStorage.getItem('veritas-auth')
         if (authStorage) {
@@ -49,29 +66,20 @@ export default function TransferPage() {
         }
       }
       
-      console.log('Token exists:', !!token)
-      console.log('Token value:', token ? `${token.substring(0, 20)}...` : 'null')
-      console.log('Lookup URL:', `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`)
-      
       if (!token) {
         toast.error('Please log in again')
-        setTimeout(() => {
-          navigate('/login')
-        }, 1500)
+        setTimeout(() => navigate('/login'), 1500)
         return
       }
       
       const response = await axios.get(
         `${API_URL.replace('/api', '')}/api/transactions/lookup-account/${accountNumber}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       )
       setRecipientInfo({ name: response.data.name })
     } catch (error: any) {
-      console.error('Lookup error:', error.response?.status, error.response?.data)
       setRecipientInfo(null)
       if (error.response?.status === 404) {
         toast.error('Account not found')
@@ -92,7 +100,6 @@ export default function TransferPage() {
   const handleAccountNumberChange = (value: string) => {
     setFormData({ ...formData, recipient: value })
     
-    // Lookup after user stops typing
     if (value.length === 10) {
       lookupAccount(value)
     } else {
@@ -103,7 +110,6 @@ export default function TransferPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate form
     if (!formData.recipient || !formData.amount) {
       toast.error('Please fill in all required fields')
       return
@@ -115,7 +121,6 @@ export default function TransferPage() {
       return
     }
 
-    // Show PIN overlay instead of processing immediately
     setShowPinOverlay(true)
   }
 
@@ -127,17 +132,14 @@ export default function TransferPage() {
       return
     }
 
-    // Close PIN overlay and start processing
     setShowPinOverlay(false)
     setIsLoading(true)
 
     const amount = parseFloat(formData.amount)
 
     try {
-      // Try to get token from multiple sources
       let token = localStorage.getItem('token')
       
-      // If not in plain localStorage, check Zustand storage
       if (!token) {
         const authStorage = localStorage.getItem('veritas-auth')
         if (authStorage) {
@@ -148,9 +150,7 @@ export default function TransferPage() {
       
       if (!token) {
         toast.error('Please log in again')
-        setTimeout(() => {
-          navigate('/login')
-        }, 1500)
+        setTimeout(() => navigate('/login'), 1500)
         return
       }
       
@@ -160,24 +160,21 @@ export default function TransferPage() {
           recipientAccountNumber: formData.recipient,
           amount: amount,
           description: formData.description,
+          pin: enteredPin, // Include PIN in request
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       )
 
-      // Save transaction data for receipt
       setTransactionData(response.data)
+      setPin(['', '', '', '']) // Clear PIN
 
-      // Transition from loading to success after progress completes
       setTimeout(() => {
         setIsLoading(false)
         setShowSuccess(true)
       }, 2000)
 
-      // Show receipt after success animation
       setTimeout(() => {
         setShowSuccess(false)
         setShowReceipt(true)
@@ -185,10 +182,22 @@ export default function TransferPage() {
     } catch (error: any) {
       console.error('Transfer error:', error)
       
-      // Check if it's a transfer limit error - show inline warning, NO TOAST
+      // Check for PIN_NOT_SET error
+      if (error.response?.data?.error === 'PIN_NOT_SET') {
+        setShowPinSetup(true)
+        return
+      }
+      
+      // Check for incorrect PIN
+      if (error.response?.data?.error === 'INCORRECT_PIN') {
+        toast.error('Incorrect PIN. Please try again.')
+        setPin(['', '', '', ''])
+        setShowPinOverlay(true) // Show PIN input again
+        return
+      }
+      
       if (error.response?.data?.error === 'TRANSFER_LIMIT_REACHED') {
         setShowInlineWarning(true)
-        // Scroll to top to show the warning
         window.scrollTo({ top: 0, behavior: 'smooth' })
       } else if (error.response?.data?.error) {
         toast.error(error.response.data.error)
@@ -208,227 +217,174 @@ export default function TransferPage() {
         <main className="flex-1 lg:ml-72 overflow-auto bg-gray-50">
           <Navbar onMenuClick={() => setShowSidebar(true)} />
           
-          <div className="p-4 md:p-8 max-w-lg mx-auto pt-20 md:pt-24">
-            {/* Main Card - Web3 Glass Morphism Style */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-gray-100/50 overflow-hidden">
-              {/* Header Section with Gradient */}
-              <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 relative overflow-hidden">
-                <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]"></div>
-                <div className="relative">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                    </div>
-                    <h1 className="text-2xl font-bold text-white">Send Money</h1>
-                  </div>
-                  <p className="text-blue-100 text-sm">Transfer funds instantly</p>
-                </div>
+          {/* Full Width Clean Layout */}
+          <div className="pt-20 md:pt-24 pb-12 px-4 md:px-8 lg:px-12 min-h-screen">
+            <div className="max-w-2xl mx-auto">
+              {/* Header */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-semibold text-gray-900 mb-2">Send Money</h1>
+                <p className="text-gray-500">Transfer funds to another account</p>
               </div>
 
-              <div className="p-6 md:p-8">
-                {/* Inline Warning Banner */}
-                {showInlineWarning && (
-                  <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200/50 rounded-3xl p-6 mb-6 relative backdrop-blur-sm">
-                    <button
-                      onClick={() => setShowInlineWarning(false)}
-                      className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-100 rounded-xl transition-all"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                    <div className="pr-10">
-                      <div className="flex items-start gap-3.5 mb-4">
-                        <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-red-900 text-base font-semibold mb-1.5 -tracking-tight">
-                            Transfers Restricted
-                          </h4>
-                          <p className="text-red-800/90 text-sm leading-relaxed font-medium">
-                            Sorry, you cannot transfer with your account. Please contact us:
-                          </p>
-                        </div>
+              {/* Restriction Warning */}
+              {showInlineWarning && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6 relative">
+                  <button
+                    onClick={() => setShowInlineWarning(false)}
+                    className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <div className="pr-10">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
                       </div>
-                      <div className="space-y-2.5 ml-[52px]">
-                        <a 
-                          href="mailto:support@veritasbank.com" 
-                          className="flex items-center gap-3 text-sm text-red-900 hover:text-red-700 transition-colors group"
-                        >
-                          <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                            <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex-1 pt-0.5">
+                        <h4 className="text-red-900 font-semibold mb-1">Transfers Restricted</h4>
+                        <p className="text-red-800 text-sm mb-3">Sorry, you cannot transfer with your account. Please contact us:</p>
+                        <div className="space-y-2">
+                          <a href="mailto:support@veritasbank.com" className="flex items-center gap-2 text-sm text-red-900 hover:text-red-700">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                          </div>
-                          <span className="font-medium">support@veritasbank.com</span>
-                        </a>
-                        <a 
-                          href="https://wa.me/13332284434" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="flex items-center gap-3 text-sm text-red-900 hover:text-red-700 transition-colors group"
-                        >
-                          <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                            <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                            support@veritasbank.com
+                          </a>
+                          <a href="https://wa.me/13332284434" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-red-900 hover:text-red-700">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                             </svg>
-                          </div>
-                          <span className="font-medium">+1 333-228-4434</span>
-                        </a>
+                            +1 333-228-4434
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
-                )}
-                
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Recipient Input - Web3 Style */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5">
-                      Recipient Account
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formData.recipient}
-                        onChange={(e) => handleAccountNumberChange(e.target.value)}
-                        className="w-full px-5 py-4 rounded-2xl border-2 border-gray-200/80 focus:border-blue-500 bg-gray-50/50 text-gray-900 font-mono font-semibold text-base outline-none transition-all placeholder:text-gray-400 placeholder:font-normal"
-                        placeholder="Enter 10-digit account"
-                        required
-                        disabled={isLoading}
-                        maxLength={10}
-                      />
-                      {isLookingUp && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                          <svg className="animate-spin h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    {recipientInfo && (
-                      <div className="mt-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200/50 rounded-2xl backdrop-blur-sm">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center">
-                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-xs text-green-600 font-medium">Verified Account</p>
-                            <p className="text-sm text-green-900 font-semibold">{recipientInfo.name}</p>
-                          </div>
-                        </div>
+                </div>
+              )}
+
+              {/* Transfer Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Recipient Account */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Recipient Account Number
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formData.recipient}
+                      onChange={(e) => handleAccountNumberChange(e.target.value)}
+                      className="w-full h-14 px-4 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white text-gray-900 font-mono text-base outline-none transition-all"
+                      placeholder="Enter 10-digit account"
+                      required
+                      disabled={isLoading}
+                      maxLength={10}
+                    />
+                    {isLookingUp && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <svg className="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                       </div>
                     )}
                   </div>
+                  {recipientInfo && (
+                    <div className="mt-3 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{recipientInfo.name}</span>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Amount Input - Sharp Web3 Design */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5">
-                      Amount
-                    </label>
-                    <div className="flex gap-3">
-                      {/* Currency Selector - Ultra Sharp */}
-                      <div className="relative">
-                        <select
-                          value={formData.currency}
-                          onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                          className="appearance-none w-24 h-14 px-4 rounded-2xl border-2 border-gray-200/80 focus:border-blue-500 bg-gradient-to-br from-gray-50 to-gray-100/50 font-bold text-gray-900 text-sm outline-none transition-all cursor-pointer"
-                          disabled={isLoading}
-                        >
-                          <option value="USD">USD</option>
-                          <option value="EUR">EUR</option>
-                          <option value="GBP">GBP</option>
-                        </select>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
+                {/* Amount */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Amount
+                  </label>
+                  <div className="flex gap-3">
+                    <select
+                      value={formData.currency}
+                      onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                      className="w-24 h-14 px-4 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white text-gray-900 font-semibold outline-none transition-all"
+                      disabled={isLoading}
+                    >
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                    <div className="flex-1 relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-lg">
+                        {formData.currency === 'USD' && '$'}
+                        {formData.currency === 'EUR' && '€'}
+                        {formData.currency === 'GBP' && '£'}
                       </div>
-
-                      {/* Amount Input */}
-                      <div className="flex-1 relative">
-                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xl">
-                          {formData.currency === 'USD' && '$'}
-                          {formData.currency === 'EUR' && '€'}
-                          {formData.currency === 'GBP' && '£'}
-                        </div>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={formData.amount}
-                          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                          className="w-full h-14 pl-10 pr-5 rounded-2xl border-2 border-gray-200/80 focus:border-blue-500 bg-gray-50/50 text-gray-900 font-bold text-xl outline-none transition-all placeholder:text-gray-300"
-                          placeholder="0.00"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                        className="w-full h-14 pl-9 pr-4 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white text-gray-900 font-semibold text-lg outline-none transition-all"
+                        placeholder="0.00"
+                        required
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {/* Description - Minimal */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5">
-                      Description
-                      <span className="text-gray-400 normal-case ml-1">(Optional)</span>
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-5 py-4 rounded-2xl border-2 border-gray-200/80 focus:border-blue-500 bg-gray-50/50 text-gray-900 resize-none outline-none transition-all placeholder:text-gray-400"
-                      placeholder="What's this for?"
-                      rows={3}
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  {/* Submit Button - Web3 Gradient */}
-                  <button
-                    type="submit"
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description <span className="text-gray-400">(Optional)</span>
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white text-gray-900 resize-none outline-none transition-all"
+                    placeholder="What's this for?"
+                    rows={3}
                     disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 text-white rounded-2xl font-bold text-base shadow-xl shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none relative overflow-hidden group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                    <span className="relative flex items-center justify-center gap-2">
-                      {isLoading ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Processing
-                        </>
-                      ) : (
-                        <>
-                          Send Money
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </>
-                      )}
-                    </span>
-                  </button>
-                </form>
-              </div>
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Processing...' : 'Send Money'}
+                </button>
+              </form>
             </div>
           </div>
         </main>
       </div>
 
-      {/* PIN Overlay - Apple Pay Style */}
+      {/* PIN Setup Modal */}
+      {showPinSetup && (
+        <PinSetupModal
+          onClose={() => setShowPinSetup(false)}
+          onSuccess={() => {
+            setShowPinSetup(false)
+            toast.success('PIN created! You can now proceed with your transfer.')
+          }}
+        />
+      )}
+
+      {/* PIN Overlay */}
       {showPinOverlay && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 animate-slideUp">
             <div className="text-center">
-              {/* Header */}
               <div className="mb-6">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -439,7 +395,6 @@ export default function TransferPage() {
                 <p className="text-sm text-gray-500">Confirm transfer of {formData.currency} {parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
               </div>
 
-              {/* PIN Input */}
               <div className="flex justify-center gap-3 mb-6">
                 {pin.map((digit, index) => (
                   <input
@@ -452,14 +407,12 @@ export default function TransferPage() {
                       newPin[index] = e.target.value
                       setPin(newPin)
                       
-                      // Auto-focus next input
                       if (e.target.value && index < 3) {
                         const nextInput = document.getElementById(`pin-${index + 1}`)
                         nextInput?.focus()
                       }
                     }}
                     onKeyDown={(e) => {
-                      // Handle backspace
                       if (e.key === 'Backspace' && !pin[index] && index > 0) {
                         const prevInput = document.getElementById(`pin-${index - 1}`)
                         prevInput?.focus()
@@ -472,7 +425,6 @@ export default function TransferPage() {
                 ))}
               </div>
 
-              {/* Buttons */}
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -495,16 +447,14 @@ export default function TransferPage() {
         </div>
       )}
 
-      {/* Loading/Success Animation - Single Modal with Smooth Transitions */}
+      {/* Loading/Success Animation */}
       {(isLoading || showSuccess) && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-[280px] w-full mx-4">
             <div className="text-center">
-              {/* Animated Circle */}
               <div className="mb-6 flex justify-center">
                 <div className="relative w-24 h-24">
                   <svg className="w-24 h-24 transform -rotate-90">
-                    {/* Background circle */}
                     <circle
                       cx="48"
                       cy="48"
@@ -513,7 +463,6 @@ export default function TransferPage() {
                       strokeWidth="4"
                       fill="none"
                     />
-                    {/* Progress/Success circle */}
                     <circle
                       cx="48"
                       cy="48"
@@ -531,7 +480,6 @@ export default function TransferPage() {
                     />
                   </svg>
                   
-                  {/* Checkmark - fades in when success */}
                   {showSuccess && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <svg 
@@ -555,12 +503,10 @@ export default function TransferPage() {
                 </div>
               </div>
               
-              {/* Text - Only show during loading */}
               {isLoading && (
                 <p className="text-base font-medium text-gray-900">Processing...</p>
               )}
               
-              {/* Success content - fades in */}
               {showSuccess && (
                 <div style={{ animation: 'fadeIn 0.4s ease-out 0.5s both' }}>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Successful</h3>
@@ -578,7 +524,6 @@ export default function TransferPage() {
       {showReceipt && transactionData && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-t-3xl text-center">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -589,9 +534,7 @@ export default function TransferPage() {
               <p className="text-blue-100 text-sm">Transaction completed</p>
             </div>
 
-            {/* Receipt Content */}
             <div className="p-6 space-y-6">
-              {/* Amount */}
               <div className="text-center pb-6 border-b border-gray-200">
                 <p className="text-sm text-gray-500 mb-1">Amount Sent</p>
                 <h2 className="text-4xl font-bold text-gray-900">
@@ -603,7 +546,6 @@ export default function TransferPage() {
                 <p className="text-sm text-gray-500 mt-1">{formData.currency}</p>
               </div>
 
-              {/* Transaction Details */}
               <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b border-gray-100">
                   <span className="text-sm text-gray-600">To</span>
@@ -650,11 +592,9 @@ export default function TransferPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="p-6 pt-0 space-y-3">
               <button
                 onClick={() => {
-                  // Save receipt as text or download - simplified for now
                   toast.success('Receipt saved')
                 }}
                 className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"

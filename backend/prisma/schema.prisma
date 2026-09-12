@@ -17,6 +17,7 @@ model User {
   email          String   @unique
   phone          String?
   password       String
+  transactionPin String?  @map("transaction_pin")
   accountNumber  String   @unique @map("account_number")
   role           String   @default("USER")
   accountStatus  String   @default("ACTIVE") @map("account_status")

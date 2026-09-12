@@ -131,9 +131,14 @@ router.post('/demo', authenticateToken, async (req: AuthRequest, res) => {
 
 // Transfer money to another user
 router.post('/transfer', authenticateToken, async (req: AuthRequest, res) => {
-  const { recipientAccountNumber, amount, description } = req.body;
+  const { recipientAccountNumber, amount, description, pin } = req.body;
 
   try {
+    // Validate PIN
+    if (!pin || !/^\d{4}$/.test(pin)) {
+      return res.status(400).json({ error: 'Invalid PIN format' });
+    }
+
     // Validate amount
     const transferAmount = parseFloat(amount);
     if (isNaN(transferAmount) || transferAmount <= 0) {
@@ -148,6 +153,18 @@ router.post('/transfer', authenticateToken, async (req: AuthRequest, res) => {
 
     if (!sender || !sender.account) {
       return res.status(404).json({ error: 'Sender account not found' });
+    }
+
+    // Check if PIN is set
+    if (!sender.transactionPin) {
+      return res.status(400).json({ error: 'PIN_NOT_SET', message: 'Please set up your transaction PIN first' });
+    }
+
+    // Verify PIN
+    const { comparePassword } = await import('../utils/helpers');
+    const isValidPin = await comparePassword(pin, sender.transactionPin);
+    if (!isValidPin) {
+      return res.status(401).json({ error: 'INCORRECT_PIN', message: 'Incorrect PIN' });
     }
 
     // Check if transfers are restricted by admin
