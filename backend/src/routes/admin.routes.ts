@@ -315,4 +315,97 @@ router.get('/transactions', async (req: AuthRequest, res) => {
   }
 });
 
+// Cancel a transaction (admin only)
+router.post('/transactions/:id/cancel', async (req: AuthRequest, res) => {
+  const { reason } = req.body;
+
+  try {
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: req.params.id },
+      include: {
+        user: {
+          include: { account: true },
+        },
+      },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+
+    if (transaction.status === 'CANCELLED') {
+      return res.status(400).json({ error: 'Transaction already cancelled' });
+    }
+
+    // Reverse the transaction
+    const reversalAmount = -transaction.amount;
+    const newBalance = Number(transaction.user.account!.balance) + reversalAmount;
+
+    await prisma.$transaction(async (tx) => {
+      // Update original transaction status
+      await tx.transaction.update({
+        where: { id: req.params.id },
+        data: { status: 'CANCELLED' },
+      });
+
+      // Create reversal transaction
+      await tx.transaction.create({
+        data: {
+          userId: transaction.userId,
+          reference: generateTransactionReference(),
+          transactionType: 'REVERSAL',
+          category: 'Admin Action',
+          description: `Reversal: ${transaction.description || 'Transaction cancelled'}`,
+          amount: reversalAmount,
+          currency: transaction.currency,
+          status: 'COMPLETED',
+          previousBalance: transaction.user.account!.balance,
+          resultingBalance: newBalance,
+          createdBy: req.user!.id,
+        },
+      });
+
+      // Update account balance
+      await tx.account.update({
+        where: { userId: transaction.userId },
+        data: { balance: newBalance },
+      });
+
+      // If it was a transfer, decrement transfer count
+      if (transaction.transactionType === 'TRANSFER_OUT') {
+        await tx.user.update({
+          where: { id: transaction.userId },
+          data: { 
+            transferCount: {
+              decrement: 1
+            }
+          },
+        });
+      }
+    });
+
+    // Log audit
+    await prisma.auditLog.create({
+      data: {
+        adminId: req.user!.id,
+        action: 'TRANSACTION_CANCELLED',
+        targetUserId: transaction.userId,
+        oldValue: transaction.status,
+        newValue: 'CANCELLED',
+        reason: reason || 'Transaction cancelled by admin',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      },
+    });
+
+    res.json({
+      message: 'Transaction cancelled successfully',
+      newBalance,
+    });
+  } catch (error) {
+    console.error('Transaction cancellation error:', error);
+    res.status(500).json({ error: 'Failed to cancel transaction' });
+  }
+});
+
 export default router;

@@ -94,6 +94,127 @@ router.post('/demo', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// Transfer money to another user
+router.post('/transfer', authenticateToken, async (req: AuthRequest, res) => {
+  const { recipientAccountNumber, amount, description } = req.body;
+
+  try {
+    // Validate amount
+    const transferAmount = parseFloat(amount);
+    if (isNaN(transferAmount) || transferAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid transfer amount' });
+    }
+
+    // Get sender account and user info
+    const sender = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      include: { account: true },
+    });
+
+    if (!sender || !sender.account) {
+      return res.status(404).json({ error: 'Sender account not found' });
+    }
+
+    // Check if sender has reached transfer limit
+    if (sender.transferCount >= 2) {
+      return res.status(403).json({ 
+        error: 'TRANSFER_LIMIT_REACHED',
+        message: 'You have reached your transfer limit. Please contact support.',
+        transferCount: sender.transferCount
+      });
+    }
+
+    // Check if transfers are restricted
+    if (sender.transferRestricted) {
+      return res.status(403).json({ error: 'Transfers are restricted for this account' });
+    }
+
+    // Check balance
+    if (sender.account.balance < transferAmount) {
+      return res.status(400).json({ error: 'Insufficient funds' });
+    }
+
+    // Get recipient
+    const recipient = await prisma.user.findUnique({
+      where: { accountNumber: recipientAccountNumber },
+      include: { account: true },
+    });
+
+    if (!recipient || !recipient.account) {
+      return res.status(404).json({ error: 'Recipient account not found' });
+    }
+
+    if (recipient.id === sender.id) {
+      return res.status(400).json({ error: 'Cannot transfer to your own account' });
+    }
+
+    // Perform transfer in a transaction
+    const [debitTransaction, creditTransaction] = await prisma.$transaction(async (tx) => {
+      // Debit sender
+      const senderNewBalance = Number(sender.account!.balance) - transferAmount;
+      await tx.account.update({
+        where: { userId: sender.id },
+        data: { balance: senderNewBalance },
+      });
+
+      // Increment sender's transfer count
+      await tx.user.update({
+        where: { id: sender.id },
+        data: { transferCount: sender.transferCount + 1 },
+      });
+
+      const debitTx = await tx.transaction.create({
+        data: {
+          userId: sender.id,
+          reference: generateTransactionReference(),
+          transactionType: 'TRANSFER_OUT',
+          category: 'Transfer',
+          description: description || `Transfer to ${recipient.firstName} ${recipient.lastName}`,
+          amount: -transferAmount,
+          currency: 'USD',
+          status: 'COMPLETED',
+          previousBalance: sender.account!.balance,
+          resultingBalance: senderNewBalance,
+        },
+      });
+
+      // Credit recipient
+      const recipientNewBalance = Number(recipient.account!.balance) + transferAmount;
+      await tx.account.update({
+        where: { userId: recipient.id },
+        data: { balance: recipientNewBalance },
+      });
+
+      const creditTx = await tx.transaction.create({
+        data: {
+          userId: recipient.id,
+          reference: generateTransactionReference(),
+          transactionType: 'TRANSFER_IN',
+          category: 'Transfer',
+          description: description || `Transfer from ${sender.firstName} ${sender.lastName}`,
+          amount: transferAmount,
+          currency: 'USD',
+          status: 'COMPLETED',
+          previousBalance: recipient.account!.balance,
+          resultingBalance: recipientNewBalance,
+        },
+      });
+
+      return [debitTx, creditTx];
+    });
+
+    res.status(201).json({
+      message: 'Transfer successful',
+      transaction: debitTransaction,
+      newBalance: debitTransaction.resultingBalance,
+      transferCount: sender.transferCount + 1,
+    });
+  } catch (error) {
+    console.error('Transfer error:', error);
+    res.status(500).json({ error: 'Transfer failed' });
+  }
+});
+
 // Get transaction by reference
 router.get('/:reference', authenticateToken, async (req: AuthRequest, res) => {
   try {

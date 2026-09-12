@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL") // Optional for development
 }
 
 // User Model - Supports both users and admins
@@ -27,6 +27,7 @@ model User {
   withdrawalRestricted  Boolean @default(false) @map("withdrawal_restricted")
   depositRestricted     Boolean @default(false) @map("deposit_restricted")
   restrictionReason     String? @map("restriction_reason")
+  transferCount         Int     @default(0) @map("transfer_count")
   
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
