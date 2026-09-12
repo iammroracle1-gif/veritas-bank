@@ -428,4 +428,48 @@ router.post('/transactions/:id/cancel', async (req: AuthRequest, res) => {
   }
 });
 
+// Toggle transfer restriction
+router.patch('/users/:id/restrict-transfer', async (req: AuthRequest, res) => {
+  const { restricted } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.params.id },
+      data: {
+        transferRestricted: restricted,
+      },
+    });
+
+    // Log audit
+    await prisma.auditLog.create({
+      data: {
+        adminId: req.user!.id,
+        action: 'TRANSFER_RESTRICTION_CHANGE',
+        targetUserId: req.params.id,
+        oldValue: user.transferRestricted.toString(),
+        newValue: restricted.toString(),
+        reason: restricted ? 'Transfers restricted by admin' : 'Transfers enabled by admin',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      },
+    });
+
+    res.json({
+      message: restricted ? 'Transfers restricted' : 'Transfers enabled',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Restrict transfer error:', error);
+    res.status(500).json({ error: 'Failed to update transfer restriction' });
+  }
+});
+
 export default router;

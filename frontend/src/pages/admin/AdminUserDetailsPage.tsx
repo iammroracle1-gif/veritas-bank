@@ -222,6 +222,51 @@ export default function AdminUserDetailsPage() {
               <option value="SUSPENDED">Suspended</option>
             </select>
           </div>
+
+          {/* Transfer Restriction Card */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Transfer Restriction</h3>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">Restrict Transfers</p>
+                <p className="text-xs text-gray-500 mt-1">User won't be able to send money</p>
+              </div>
+              <button
+                onClick={() => {
+                  // Toggle restriction
+                  const newValue = !user.transferRestricted
+                  // Call API to update
+                  fetch(`${import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'}/admin/users/${user.id}/restrict-transfer`, {
+                    method: 'PATCH',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ restricted: newValue })
+                  }).then(() => {
+                    toast.success(newValue ? 'Transfers restricted' : 'Transfers enabled')
+                    refetch()
+                  }).catch(() => {
+                    toast.error('Failed to update restriction')
+                  })
+                }}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                  user.transferRestricted ? 'bg-red-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                    user.transferRestricted ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+              <option value="PENDING">Pending</option>
+              <option value="SUSPENDED">Suspended</option>
+            </select>
+          </div>
         </div>
 
         {/* Right Column - Transactions */}
