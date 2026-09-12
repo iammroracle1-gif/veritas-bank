@@ -15,11 +15,53 @@ export default function TransferPage() {
   const [showSidebar, setShowSidebar] = useState(false)
   const [showRestrictionModal, setShowRestrictionModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLookingUp, setIsLookingUp] = useState(false)
+  const [recipientInfo, setRecipientInfo] = useState<{name: string} | null>(null)
   const [formData, setFormData] = useState({
     recipient: '',
     amount: '',
     description: '',
   })
+
+  // Lookup recipient account
+  const lookupAccount = async (accountNumber: string) => {
+    if (!accountNumber || accountNumber.length < 12) {
+      setRecipientInfo(null)
+      return
+    }
+
+    setIsLookingUp(true)
+    try {
+      const token = localStorage.getItem('token')
+      const response = await axios.get(
+        `${API_URL}/api/transactions/lookup-account/${accountNumber}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      setRecipientInfo({ name: response.data.name })
+    } catch (error: any) {
+      setRecipientInfo(null)
+      if (error.response?.status === 404) {
+        toast.error('Account not found')
+      }
+    } finally {
+      setIsLookingUp(false)
+    }
+  }
+
+  const handleAccountNumberChange = (value: string) => {
+    setFormData({ ...formData, recipient: value })
+    
+    // Lookup after user stops typing
+    if (value.length === 12) {
+      lookupAccount(value)
+    } else {
+      setRecipientInfo(null)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -117,12 +159,23 @@ export default function TransferPage() {
                   <input
                     type="text"
                     value={formData.recipient}
-                    onChange={(e) => setFormData({ ...formData, recipient: e.target.value })}
+                    onChange={(e) => handleAccountNumberChange(e.target.value)}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter account number"
+                    placeholder="Enter 12-digit account number"
                     required
                     disabled={isLoading}
+                    maxLength={12}
                   />
+                  {isLookingUp && (
+                    <p className="mt-2 text-sm text-gray-500">Looking up account...</p>
+                  )}
+                  {recipientInfo && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        <span className="font-semibold">Recipient:</span> {recipientInfo.name}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div>

@@ -264,9 +264,9 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
         data: {
           userId: req.params.id,
           reference: generateTransactionReference(),
-          transactionType: 'ADMIN_ADJUSTMENT',
-          category: 'Admin Adjustment',
-          description: description || reason,
+          transactionType: 'CREDIT',
+          category: 'Deposit',
+          description: description || 'Account funding',
           amount: Number(amount),
           currency: 'USD',
           status: 'COMPLETED',

@@ -17,10 +17,19 @@ export default function DashboardPage() {
     queryKey: ['dashboard'],
     queryFn: () => userApi.getDashboard(),
     refetchInterval: 3000, // Refetch every 3 seconds for real-time balance sync
+    staleTime: 0, // Always consider data stale
+    cacheTime: 0, // Don't cache
   })
 
-  const balance = dashboardData?.data?.balance || user?.balance || 0
+  const balance = dashboardData?.data?.balance || 0
   const accountNumber = user?.accountNumber || 'N/A'
+  const userName = user ? `${user.firstName} ${user.lastName}` : ''
+
+  const copyAccountDetails = () => {
+    const details = `${userName}\n${accountNumber}`
+    navigator.clipboard.writeText(details)
+    toast.success('Account details copied!')
+  }
 
   const handleLogout = () => {
     logout()
@@ -50,10 +59,22 @@ export default function DashboardPage() {
           <div className="p-6 md:p-8 max-w-5xl mx-auto pt-24 md:pt-28">
             {/* Balance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {/* Account Number Card */}
+              {/* Account Number Card with Copy */}
               <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
-                <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">Account Number</p>
-                <p className="text-gray-900 text-3xl md:text-4xl font-bold">{accountNumber}</p>
+                <div className="flex items-start justify-between mb-3">
+                  <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide">Account Details</p>
+                  <button
+                    onClick={copyAccountDetails}
+                    className="text-blue-600 hover:text-blue-700 p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Copy account details"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-gray-900 text-xl md:text-2xl font-bold mb-2">{userName}</p>
+                <p className="text-gray-600 text-lg md:text-xl font-mono font-semibold">{accountNumber}</p>
               </div>
 
               {/* USD Balance Card */}
