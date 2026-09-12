@@ -286,16 +286,16 @@ export default function TransferPage() {
         </main>
       </div>
 
-      {/* Loading/Success Modal - Single Unified Animation */}
+      {/* Loading/Success Modal - Smooth Transition */}
       {(isLoading || showSuccess) && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-[280px] w-full mx-4">
             <div className="text-center">
-              {/* Animated Circle - Progress to Checkmark */}
+              {/* Animated Circle */}
               <div className="mb-5 flex justify-center">
                 <div className="relative w-20 h-20">
-                  {/* Background circle */}
                   <svg className="w-20 h-20 transform -rotate-90">
+                    {/* Background circle */}
                     <circle
                       cx="40"
                       cy="40"
@@ -304,41 +304,26 @@ export default function TransferPage() {
                       strokeWidth="4"
                       fill="none"
                     />
-                    {/* Progress circle */}
-                    {isLoading && (
-                      <circle
-                        cx="40"
-                        cy="40"
-                        r="36"
-                        stroke="#3B82F6"
-                        strokeWidth="4"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeDasharray="226"
-                        strokeDashoffset="0"
-                        className="transition-all duration-1000 ease-linear"
-                        style={{
-                          animation: 'progress 1.5s ease-out forwards'
-                        }}
-                      />
-                    )}
-                    {/* Success circle - full green */}
-                    {showSuccess && (
-                      <circle
-                        cx="40"
-                        cy="40"
-                        r="36"
-                        stroke="#10B981"
-                        strokeWidth="4"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeDasharray="226"
-                        strokeDashoffset="0"
-                      />
-                    )}
+                    {/* Animated progress/success circle */}
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="36"
+                      stroke={showSuccess ? "#10B981" : "#3B82F6"}
+                      strokeWidth="4"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeDasharray="226"
+                      strokeDashoffset={isLoading ? "226" : "0"}
+                      className="transition-all"
+                      style={{
+                        animation: isLoading ? 'fillCircle 1.5s ease-out forwards' : 'none',
+                        transitionDuration: '0.3s'
+                      }}
+                    />
                   </svg>
                   
-                  {/* Checkmark appears after progress completes */}
+                  {/* Checkmark - only shows on success */}
                   {showSuccess && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <svg 
@@ -347,7 +332,7 @@ export default function TransferPage() {
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
                         style={{
-                          animation: 'checkmark 0.4s ease-out'
+                          animation: 'popIn 0.3s ease-out'
                         }}
                       >
                         <path 
@@ -382,16 +367,16 @@ export default function TransferPage() {
       )}
 
       <style>{`
-        @keyframes progress {
-          0% {
+        @keyframes fillCircle {
+          from {
             stroke-dashoffset: 226;
           }
-          100% {
+          to {
             stroke-dashoffset: 0;
           }
         }
         
-        @keyframes checkmark {
+        @keyframes popIn {
           0% {
             transform: scale(0);
             opacity: 0;
