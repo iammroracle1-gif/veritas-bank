@@ -147,17 +147,13 @@ export default function TransferPage() {
         }
       )
 
-      // Show success animation
-      setShowSuccess(true)
-      
-      // Check if transfer count reached limit
-      if (response.data.transferCount >= 2) {
-        setTimeout(() => {
-          toast('You have reached your transfer limit', { icon: '⚠️' })
-        }, 2000)
-      }
+      // Transition from loading to success
+      setTimeout(() => {
+        setIsLoading(false)
+        setShowSuccess(true)
+      }, 1500) // Wait for progress animation to complete
 
-      // Reset form and navigate after animation
+      // Reset form and navigate after showing success
       setTimeout(() => {
         setFormData({
           recipient: '',
@@ -166,7 +162,7 @@ export default function TransferPage() {
         })
         setShowSuccess(false)
         navigate('/dashboard')
-      }, 3000)
+      }, 3500) // Show success for 2 more seconds
     } catch (error: any) {
       console.error('Transfer error:', error)
       
@@ -302,45 +298,125 @@ export default function TransferPage() {
         </main>
       </div>
 
-      {/* Loading Progress Modal */}
-      {isLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full mx-4">
+      {/* Loading/Success Modal - Single Unified Animation */}
+      {(isLoading || showSuccess) && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-[280px] w-full mx-4">
             <div className="text-center">
-              {/* Animated loader */}
-              <div className="mb-6 flex justify-center">
-                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+              {/* Animated Circle - Progress to Checkmark */}
+              <div className="mb-5 flex justify-center">
+                <div className="relative w-20 h-20">
+                  {/* Background circle */}
+                  <svg className="w-20 h-20 transform -rotate-90">
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="36"
+                      stroke="#E5E7EB"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    {/* Progress circle */}
+                    {isLoading && (
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        stroke="#3B82F6"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray="226"
+                        strokeDashoffset="0"
+                        className="transition-all duration-1000 ease-linear"
+                        style={{
+                          animation: 'progress 1.5s ease-out forwards'
+                        }}
+                      />
+                    )}
+                    {/* Success circle - full green */}
+                    {showSuccess && (
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        stroke="#10B981"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray="226"
+                        strokeDashoffset="0"
+                      />
+                    )}
+                  </svg>
+                  
+                  {/* Checkmark appears after progress completes */}
+                  {showSuccess && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg 
+                        className="w-10 h-10 text-green-600" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                        style={{
+                          animation: 'checkmark 0.4s ease-out'
+                        }}
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={3} 
+                          d="M5 13l4 4L19 7" 
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Processing</h3>
-              <p className="text-gray-500 text-sm">Sending your transfer...</p>
+              
+              {/* Text */}
+              {isLoading && (
+                <p className="text-[15px] font-medium text-gray-900">Processing</p>
+              )}
+              
+              {showSuccess && (
+                <>
+                  <h3 className="text-[17px] font-semibold text-gray-900 mb-1">Transfer Complete</h3>
+                  <p className="text-[15px] text-gray-500 mb-2">Successfully sent</p>
+                  <p className="text-[20px] font-semibold text-green-600">
+                    ${parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Success Animation Modal */}
-      {showSuccess && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full mx-4">
-            <div className="text-center">
-              {/* Success Checkmark */}
-              <div className="mb-6 flex justify-center">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Transfer Successful</h3>
-              <p className="text-gray-500 text-sm mb-3">Your money has been sent</p>
-              <p className="text-3xl font-bold text-green-600">
-                ${parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <style>{`
+        @keyframes progress {
+          0% {
+            stroke-dashoffset: 226;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+        
+        @keyframes checkmark {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
 
     </>
   )
