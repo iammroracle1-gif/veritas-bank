@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
-import TransferRestrictionModal from '../components/TransferRestrictionModal'
 import { useAuthStore } from '../stores/authStore'
 import axios from 'axios'
 
@@ -13,7 +12,7 @@ export default function TransferPage() {
   const navigate = useNavigate()
   const { logout } = useAuthStore()
   const [showSidebar, setShowSidebar] = useState(false)
-  const [showRestrictionModal, setShowRestrictionModal] = useState(false)
+  const [showInlineWarning, setShowInlineWarning] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [isLookingUp, setIsLookingUp] = useState(false)
@@ -173,7 +172,8 @@ export default function TransferPage() {
       
       // Check if it's a transfer limit error
       if (error.response?.data?.error === 'TRANSFER_LIMIT_REACHED') {
-        setShowRestrictionModal(true)
+        setShowInlineWarning(true)
+        toast.error('Transfer limit reached')
       } else if (error.response?.data?.error) {
         toast.error(error.response.data.error)
       } else {
@@ -193,6 +193,42 @@ export default function TransferPage() {
           <Navbar onMenuClick={() => setShowSidebar(true)} />
           
           <div className="p-6 md:p-8 max-w-2xl mx-auto pt-24 md:pt-28">
+            {/* Inline Warning */}
+            {showInlineWarning && (
+              <div className="bg-gradient-to-br from-pink-100 via-red-50 to-pink-100 border-2 border-red-200 rounded-2xl p-6 mb-6">
+                <div className="flex items-start gap-3">
+                  <button
+                    onClick={() => setShowInlineWarning(false)}
+                    className="text-red-600 hover:text-red-800 text-xl font-bold"
+                  >
+                    ×
+                  </button>
+                  <div className="flex-1">
+                    <p className="text-red-900 text-base font-medium mb-3">
+                      Sorry, you can not transfer with your account! contact us with:
+                    </p>
+                    <div className="space-y-2">
+                      <a 
+                        href="mailto:info@bvalimited.online"
+                        className="block text-blue-600 hover:underline font-medium text-sm"
+                      >
+                        info@bvalimited.online
+                      </a>
+                      <p className="text-red-900 text-sm">or WhatsApp</p>
+                      <a
+                        href="https://wa.me/16722848285"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-blue-600 hover:underline font-medium text-sm"
+                      >
+                        +16722848285
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
               <h1 className="text-2xl font-bold text-gray-900 mb-6">Send Money</h1>
               
@@ -265,12 +301,6 @@ export default function TransferPage() {
           </div>
         </main>
       </div>
-
-      {/* Transfer Restriction Modal */}
-      <TransferRestrictionModal 
-        isOpen={showRestrictionModal}
-        onClose={() => setShowRestrictionModal(false)}
-      />
 
       {/* Loading Progress Modal */}
       {isLoading && (

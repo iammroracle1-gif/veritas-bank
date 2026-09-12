@@ -119,28 +119,13 @@ export default function NotificationsPage() {
     }
   }, [transactionsData])
 
-  const getIconColor = (type: string) => {
-    if (type === 'credit') {
-      return 'bg-green-500'
-    } else {
-      return 'bg-gray-800'
-    }
-  }
-
   const getIcon = (type: string) => {
-    if (type === 'credit') {
-      return (
-        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
-      )
-    } else {
-      return (
-        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-      )
-    }
+    // Just show the app logo/icon like iOS does
+    return (
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+        VB
+      </div>
+    )
   }
     }
   }
@@ -196,32 +181,28 @@ export default function NotificationsPage() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-white rounded-xl p-3.5 shadow-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    {/* Icon */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getIconColor(notification.type)}`}>
-                      {getIcon(notification.type)}
-                    </div>
+                  <div className="flex items-start gap-3">
+                    {/* App Icon */}
+                    {getIcon(notification.type)}
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-gray-900">
+                      <div className="flex items-baseline justify-between gap-2 mb-1">
+                        <p className="text-xs font-semibold text-gray-500 uppercase">Veritas Bank</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(notification.createdAt).toLocaleString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900 mb-0.5">
                         {notification.title}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {new Date(notification.createdAt).toLocaleString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </div>
-
-                    {/* Amount */}
-                    <div className="text-right">
-                      <p className={`text-base font-bold ${notification.type === 'credit' ? 'text-green-600' : 'text-gray-900'}`}>
+                      <p className="text-sm text-gray-600">
                         {notification.type === 'credit' ? '+' : '-'}${Math.abs(notification.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
