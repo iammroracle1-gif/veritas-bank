@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => userApi.getDashboard(),
+    refetchInterval: 3000, // Refetch every 3 seconds for real-time balance sync
   })
 
   const balance = dashboardData?.data?.balance || user?.balance || 0

@@ -3,6 +3,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
+  const notificationCount = 0 // Real notification count - will be implemented
+
   return (
     <header className="bg-[#1e3a5f] fixed top-0 left-0 right-0 z-30 lg:left-72">
       <div className="flex items-center justify-between px-6 py-4">
@@ -24,15 +26,20 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         {/* Right: Notification Bell & Menu */}
         <div className="flex items-center space-x-3">
           {/* Notification Bell with Badge */}
-          <button className="relative text-white p-2 hover:bg-white/10 rounded-lg transition-colors">
+          <a
+            href="/dashboard/notifications"
+            className="relative text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            {/* Red Badge */}
-            <span className="absolute top-1 right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-              7
-            </span>
-          </button>
+            {/* Red Badge - only show when count > 0 */}
+            {notificationCount > 0 && (
+              <span className="absolute top-1 right-1 flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </span>
+            )}
+          </a>
 
           {/* User Avatar (Small) */}
           <button className="relative">

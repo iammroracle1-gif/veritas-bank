@@ -236,13 +236,15 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredUsers.map((user: any) => {
-                  const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
                   return (
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-sm">
-                            {initials}
+                          {/* Profile Icon - Generic SVG */}
+                          <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg className="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                            </svg>
                           </div>
                           <div>
                             <div className="font-semibold text-gray-900 text-sm">
