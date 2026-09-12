@@ -124,7 +124,7 @@ export default function AdminUserDetailsPage() {
         <div className="px-6 pb-6">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between -mt-12 md:-mt-16">
             {/* Avatar & Name */}
-            <div className="flex flex-col md:flex-row md:items-end md:gap-4">
+            <div className="flex flex-col md:flex-row md:items-end md:gap-4 mb-4 md:mb-0">
               {/* Profile Icon - Generic SVG */}
               <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full shadow-lg border-4 border-white flex items-center justify-center mb-4 md:mb-0">
                 <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -133,15 +133,11 @@ export default function AdminUserDetailsPage() {
               </div>
               
               {/* User Info */}
-              <div className="mb-4 md:mb-2">
+              <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
                   {user.firstName} {user.lastName}
                 </h1>
-                <p className="text-gray-600 text-sm md:text-base mb-2">{user.email}</p>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex w-3 h-3 rounded-full ${getStatusColor(user.accountStatus)}`}></span>
-                  <span className="text-sm font-medium text-gray-700">{user.accountStatus}</span>
-                </div>
+                <p className="text-gray-600 text-sm md:text-base">{user.email}</p>
               </div>
             </div>
 

@@ -235,6 +235,13 @@ router.patch('/users/:id/restrictions', async (req: AuthRequest, res) => {
 router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
   const { amount, reason, description } = req.body;
 
+  console.log('Balance adjustment request:', {
+    userId: req.params.id,
+    amount,
+    reason,
+    description,
+  });
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.params.id },
@@ -242,10 +249,13 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
     });
 
     if (!user || !user.account) {
+      console.error('User or account not found:', req.params.id);
       return res.status(404).json({ error: 'User or account not found' });
     }
 
+    console.log('Current balance:', user.account.balance);
     const newBalance = Number(user.account.balance) + Number(amount);
+    console.log('New balance will be:', newBalance);
 
     // Use transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx) => {
@@ -272,6 +282,7 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
         data: { balance: newBalance },
       });
 
+      console.log('Balance updated successfully:', updatedAccount.balance);
       return { transaction, updatedAccount };
     });
 
@@ -290,6 +301,7 @@ router.post('/users/:id/adjust-balance', async (req: AuthRequest, res) => {
     });
 
     res.json({
+      success: true,
       message: 'Balance adjusted successfully',
       transaction: result.transaction,
       newBalance: result.updatedAccount.balance,
