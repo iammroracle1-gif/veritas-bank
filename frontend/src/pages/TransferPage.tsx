@@ -166,10 +166,11 @@ export default function TransferPage() {
     } catch (error: any) {
       console.error('Transfer error:', error)
       
-      // Check if it's a transfer limit error
+      // Check if it's a transfer limit error - show inline warning, NO TOAST
       if (error.response?.data?.error === 'TRANSFER_LIMIT_REACHED') {
         setShowInlineWarning(true)
-        toast.error('Transfer limit reached')
+        // Scroll to top to show the warning
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       } else if (error.response?.data?.error) {
         toast.error(error.response.data.error)
       } else {
@@ -189,43 +190,30 @@ export default function TransferPage() {
           <Navbar onMenuClick={() => setShowSidebar(true)} />
           
           <div className="p-6 md:p-8 max-w-2xl mx-auto pt-24 md:pt-28">
-            {/* Inline Warning */}
-            {showInlineWarning && (
-              <div className="bg-gradient-to-br from-pink-100 via-red-50 to-pink-100 border-2 border-red-200 rounded-2xl p-6 mb-6">
-                <div className="flex items-start gap-3">
+            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+              {/* Inline Warning Banner - Inside Form */}
+              {showInlineWarning && (
+                <div className="bg-gradient-to-br from-pink-100 to-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 relative">
                   <button
                     onClick={() => setShowInlineWarning(false)}
-                    className="text-red-600 hover:text-red-800 text-xl font-bold"
+                    className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-red-600 hover:bg-red-100 rounded transition-colors"
                   >
                     ×
                   </button>
-                  <div className="flex-1">
-                    <p className="text-red-900 text-base font-medium mb-3">
-                      Sorry, you can not transfer with your account! contact us with:
+                  <div className="pr-8">
+                    <p className="text-red-900 text-sm font-medium leading-relaxed">
+                      Sorry, you can not transfer with your account!. contact us with:
                     </p>
-                    <div className="space-y-2">
-                      <a 
-                        href="mailto:info@bvalimited.online"
-                        className="block text-blue-600 hover:underline font-medium text-sm"
-                      >
-                        info@bvalimited.online
-                      </a>
-                      <p className="text-red-900 text-sm">or WhatsApp</p>
-                      <a
-                        href="https://wa.me/16722848285"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-blue-600 hover:underline font-medium text-sm"
-                      >
-                        +16722848285
-                      </a>
-                    </div>
+                    <p className="text-red-900 text-sm mt-2">
+                      <a href="mailto:info@bvalimited.online" className="underline">info@bvalimited.online</a>
+                    </p>
+                    <p className="text-red-900 text-sm">
+                      or WhatsApp <a href="https://wa.me/16722848285" target="_blank" rel="noopener noreferrer" className="underline">+16722848285</a>
+                    </p>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
               <h1 className="text-2xl font-bold text-gray-900 mb-6">Send Money</h1>
               
               <form onSubmit={handleSubmit} className="space-y-6">
