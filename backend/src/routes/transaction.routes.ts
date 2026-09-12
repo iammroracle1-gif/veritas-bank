@@ -150,7 +150,7 @@ router.post('/transfer', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Sender account not found' });
     }
 
-    // Check if sender has reached transfer limit
+    // Check if sender has reached transfer limit (restrict on 3rd transfer, not 2nd)
     if (sender.transferCount >= 2) {
       return res.status(403).json({ 
         error: 'TRANSFER_LIMIT_REACHED',
