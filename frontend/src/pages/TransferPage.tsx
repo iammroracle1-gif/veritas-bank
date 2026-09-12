@@ -13,14 +13,19 @@ export default function TransferPage() {
   const { logout } = useAuthStore()
   const [showSidebar, setShowSidebar] = useState(false)
   const [showInlineWarning, setShowInlineWarning] = useState(false)
+  const [showPinOverlay, setShowPinOverlay] = useState(false)
+  const [pin, setPin] = useState(['', '', '', ''])
   const [isLoading, setIsLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showReceipt, setShowReceipt] = useState(false)
+  const [transactionData, setTransactionData] = useState<any>(null)
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [recipientInfo, setRecipientInfo] = useState<{name: string} | null>(null)
   const [formData, setFormData] = useState({
     recipient: '',
     amount: '',
     description: '',
+    currency: 'USD',
   })
 
   // Lookup recipient account
@@ -110,7 +115,23 @@ export default function TransferPage() {
       return
     }
 
+    // Show PIN overlay instead of processing immediately
+    setShowPinOverlay(true)
+  }
+
+  const handlePinSubmit = async () => {
+    const enteredPin = pin.join('')
+    
+    if (enteredPin.length !== 4) {
+      toast.error('Please enter 4-digit PIN')
+      return
+    }
+
+    // Close PIN overlay and start processing
+    setShowPinOverlay(false)
     setIsLoading(true)
+
+    const amount = parseFloat(formData.amount)
 
     try {
       // Try to get token from multiple sources
@@ -147,22 +168,20 @@ export default function TransferPage() {
         }
       )
 
+      // Save transaction data for receipt
+      setTransactionData(response.data)
+
       // Transition from loading to success after progress completes
       setTimeout(() => {
         setIsLoading(false)
         setShowSuccess(true)
-      }, 2000) // Wait for progress animation (2s)
+      }, 2000)
 
-      // Reset form and navigate after showing success
+      // Show receipt after success animation
       setTimeout(() => {
-        setFormData({
-          recipient: '',
-          amount: '',
-          description: '',
-        })
         setShowSuccess(false)
-        navigate('/dashboard')
-      }, 4500) // Show success for 2.5 more seconds
+        setShowReceipt(true)
+      }, 4000)
     } catch (error: any) {
       console.error('Transfer error:', error)
       
@@ -245,18 +264,31 @@ export default function TransferPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Amount (USD)
+                    Amount
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                    required
-                    disabled={isLoading}
-                  />
+                  <div className="flex gap-3">
+                    <select
+                      value={formData.currency}
+                      onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                      className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-semibold"
+                      disabled={isLoading}
+                    >
+                      <option value="USD">USD $</option>
+                      <option value="EUR">EUR €</option>
+                      <option value="GBP">GBP £</option>
+                      <option value="USDT">USDT ₮</option>
+                    </select>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0.00"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
 
                 <div>
