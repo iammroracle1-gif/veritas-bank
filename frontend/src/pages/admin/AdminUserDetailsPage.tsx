@@ -263,11 +263,6 @@ export default function AdminUserDetailsPage() {
             </div>
           </div>
         </div>
-              <option value="PENDING">Pending</option>
-              <option value="SUSPENDED">Suspended</option>
-            </select>
-          </div>
-        </div>
 
         {/* Right Column - Transactions */}
         <div className="md:col-span-2">

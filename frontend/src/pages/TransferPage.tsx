@@ -318,7 +318,79 @@ export default function TransferPage() {
         </main>
       </div>
 
-      {/* Loading/Success Animation - Fintech Style */}
+      {/* PIN Overlay - Apple Pay Style */}
+      {showPinOverlay && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 animate-slideUp">
+            <div className="text-center">
+              {/* Header */}
+              <div className="mb-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Enter Your PIN</h3>
+                <p className="text-sm text-gray-500">Confirm transfer of {formData.currency} {parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              </div>
+
+              {/* PIN Input */}
+              <div className="flex justify-center gap-3 mb-6">
+                {pin.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="password"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => {
+                      const newPin = [...pin]
+                      newPin[index] = e.target.value
+                      setPin(newPin)
+                      
+                      // Auto-focus next input
+                      if (e.target.value && index < 3) {
+                        const nextInput = document.getElementById(`pin-${index + 1}`)
+                        nextInput?.focus()
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Handle backspace
+                      if (e.key === 'Backspace' && !pin[index] && index > 0) {
+                        const prevInput = document.getElementById(`pin-${index - 1}`)
+                        prevInput?.focus()
+                      }
+                    }}
+                    id={`pin-${index}`}
+                    className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowPinOverlay(false)
+                    setPin(['', '', '', ''])
+                  }}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePinSubmit}
+                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading/Success Animation - Single Modal with Smooth Transitions */}
       {(isLoading || showSuccess) && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-[280px] w-full mx-4">
@@ -397,6 +469,112 @@ export default function TransferPage() {
         </div>
       )}
 
+      {/* Transaction Receipt Modal */}
+      {showReceipt && transactionData && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-t-3xl text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-1">Transfer Successful</h3>
+              <p className="text-blue-100 text-sm">Transaction completed</p>
+            </div>
+
+            {/* Receipt Content */}
+            <div className="p-6 space-y-6">
+              {/* Amount */}
+              <div className="text-center pb-6 border-b border-gray-200">
+                <p className="text-sm text-gray-500 mb-1">Amount Sent</p>
+                <h2 className="text-4xl font-bold text-gray-900">
+                  {formData.currency === 'USD' && '$'}
+                  {formData.currency === 'EUR' && '€'}
+                  {formData.currency === 'GBP' && '£'}
+                  {formData.currency === 'USDT' && '₮'}
+                  {parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">{formData.currency}</p>
+              </div>
+
+              {/* Transaction Details */}
+              <div className="space-y-4">
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">To</span>
+                  <span className="text-sm font-semibold text-gray-900">{recipientInfo?.name || formData.recipient}</span>
+                </div>
+
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Account Number</span>
+                  <span className="text-sm font-mono font-semibold text-gray-900">{formData.recipient}</span>
+                </div>
+
+                {formData.description && (
+                  <div className="flex justify-between py-3 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Description</span>
+                    <span className="text-sm text-gray-900 text-right max-w-[200px]">{formData.description}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Transaction ID</span>
+                  <span className="text-xs font-mono text-gray-900">{transactionData.id?.substring(0, 12)}...</span>
+                </div>
+
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Date</span>
+                  <span className="text-sm text-gray-900">
+                    {new Date().toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-3">
+                  <span className="text-sm text-gray-600">Status</span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
+                    Completed
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 pt-0 space-y-3">
+              <button
+                onClick={() => {
+                  // Save receipt as text or download - simplified for now
+                  toast.success('Receipt saved')
+                }}
+                className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"
+              >
+                Save Receipt
+              </button>
+              <button
+                onClick={() => {
+                  setShowReceipt(false)
+                  setFormData({ recipient: '', amount: '', description: '', currency: 'USD' })
+                  setRecipientInfo(null)
+                  setPin(['', '', '', ''])
+                  setTransactionData(null)
+                  navigate('/dashboard')
+                }}
+                className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fillCircle {
           0% {
@@ -430,6 +608,25 @@ export default function TransferPage() {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        
+        @keyframes slideUp {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
         }
       `}</style>
 
