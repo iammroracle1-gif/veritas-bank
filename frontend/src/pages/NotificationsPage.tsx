@@ -120,35 +120,28 @@ export default function NotificationsPage() {
   }, [transactionsData])
 
   const getIconColor = (type: string) => {
-    switch (type) {
-      case 'credit':
-        return 'bg-green-100 text-green-600'
-      case 'debit':
-        return 'bg-red-100 text-red-600'
-      default:
-        return 'bg-blue-100 text-blue-600'
+    if (type === 'credit') {
+      return 'bg-green-500'
+    } else {
+      return 'bg-gray-800'
     }
   }
 
   const getIcon = (type: string) => {
     if (type === 'credit') {
       return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      )
-    } else if (type === 'debit') {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       )
     } else {
       return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
       )
+    }
+  }
     }
   }
 
@@ -199,47 +192,38 @@ export default function NotificationsPage() {
             </div>
           ) : notifications.length > 0 ? (
             /* Notifications List */
-            <div className="space-y-2">
+            <div className="space-y-3">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  onClick={() => !notification.read && markAsRead(notification.id)}
-                  className={`bg-white rounded-2xl p-4 md:p-5 shadow-sm transition-all cursor-pointer hover:shadow-md ${
-                    !notification.read ? 'border-l-4 border-blue-500' : ''
-                  }`}
+                  className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-3">
                     {/* Icon */}
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${getIconColor(notification.type)}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getIconColor(notification.type)}`}>
                       {getIcon(notification.type)}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3 mb-1">
-                        <h3 className={`text-base font-semibold ${!notification.read ? 'text-gray-900' : 'text-gray-600'}`}>
-                          {notification.title}
-                        </h3>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {notification.message}
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        {notification.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {new Date(notification.createdAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
-                          {new Date(notification.createdAt).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                        <p className="text-xs text-gray-400 font-mono">
-                          {notification.reference}
-                        </p>
-                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="text-right">
+                      <p className={`text-base font-bold ${notification.type === 'credit' ? 'text-green-600' : 'text-gray-900'}`}>
+                        {notification.type === 'credit' ? '+' : '-'}${Math.abs(notification.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
                     </div>
                   </div>
                 </div>

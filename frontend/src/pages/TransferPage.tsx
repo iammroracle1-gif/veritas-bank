@@ -274,47 +274,15 @@ export default function TransferPage() {
 
       {/* Loading Progress Modal */}
       {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full mx-4">
             <div className="text-center">
-              <div className="mb-6">
-                <div className="relative w-20 h-20 mx-auto">
-                  {/* Circular progress */}
-                  <svg className="w-20 h-20 transform -rotate-90">
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="36"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      fill="none"
-                      className="text-gray-200"
-                    />
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="36"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeLinecap="round"
-                      className="text-blue-600 animate-progress"
-                      style={{
-                        strokeDasharray: '226',
-                        strokeDashoffset: '0',
-                        animation: 'progress 2s ease-in-out infinite'
-                      }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                  </div>
-                </div>
+              {/* Animated loader */}
+              <div className="mb-6 flex justify-center">
+                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Transfer</h3>
-              <p className="text-gray-600 text-sm">Please wait while we process your transaction...</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Processing</h3>
+              <p className="text-gray-500 text-sm">Sending your transfer...</p>
             </div>
           </div>
         </div>
@@ -322,31 +290,21 @@ export default function TransferPage() {
 
       {/* Success Animation Modal */}
       {showSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 animate-scale-in">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full mx-4">
             <div className="text-center">
-              {/* Success Checkmark Animation */}
+              {/* Success Checkmark */}
               <div className="mb-6 flex justify-center">
-                <div className="relative">
-                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
-                    <svg className="w-12 h-12 text-green-600 animate-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={3} 
-                        d="M5 13l4 4L19 7"
-                        className="animate-draw-check"
-                      />
-                    </svg>
-                  </div>
-                  {/* Success ring animation */}
-                  <div className="absolute inset-0 w-24 h-24 border-4 border-green-400 rounded-full animate-ping opacity-75"></div>
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Transfer Successful!</h3>
-              <p className="text-gray-600 text-sm mb-1">Your money has been sent</p>
-              <p className="text-2xl font-bold text-green-600 mt-2">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Transfer Successful</h3>
+              <p className="text-gray-500 text-sm mb-3">Your money has been sent</p>
+              <p className="text-3xl font-bold text-green-600">
                 ${parseFloat(formData.amount || '0').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
@@ -354,55 +312,6 @@ export default function TransferPage() {
         </div>
       )}
 
-      <style>{`
-        @keyframes progress {
-          0% {
-            stroke-dashoffset: 226;
-          }
-          50% {
-            stroke-dashoffset: 56;
-          }
-          100% {
-            stroke-dashoffset: 226;
-          }
-        }
-        
-        @keyframes scale-in {
-          0% {
-            transform: scale(0.8);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.05);
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes draw-check {
-          0% {
-            stroke-dasharray: 0, 100;
-          }
-          100% {
-            stroke-dasharray: 100, 0;
-          }
-        }
-        
-        .animate-scale-in {
-          animation: scale-in 0.5s ease-out;
-        }
-        
-        .animate-draw-check {
-          stroke-dasharray: 100;
-          animation: draw-check 0.6s ease-out 0.2s forwards;
-        }
-        
-        .animate-check {
-          animation: scale-in 0.3s ease-out 0.2s both;
-        }
-      `}</style>
     </>
   )
 }
