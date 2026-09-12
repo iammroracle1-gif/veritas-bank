@@ -21,6 +21,9 @@ export default function DashboardPage() {
     cacheTime: 0, // Don't cache
   })
 
+  console.log('Dashboard data:', dashboardData)
+  console.log('Balance from data:', dashboardData?.data?.balance)
+
   const balance = dashboardData?.data?.balance || 0
   const accountNumber = user?.accountNumber || 'N/A'
   const userName = user ? `${user.firstName} ${user.lastName}` : ''
