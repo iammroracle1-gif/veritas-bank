@@ -235,35 +235,14 @@ export default function AdminUserDetailsPage() {
                 onClick={async () => {
                   const newValue = !user.transferRestricted
                   try {
-                    // Get admin token
-                    const token = localStorage.getItem('token')
-                    if (!token) {
-                      toast.error('Please log in again')
-                      return
-                    }
-
-                    const response = await fetch(
-                      `${import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'}/admin/users/${user.id}/restrict-transfer`,
-                      {
-                        method: 'PATCH',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ restricted: newValue })
-                      }
-                    )
-
-                    if (!response.ok) {
-                      const error = await response.json()
-                      throw new Error(error.error || 'Failed to update')
-                    }
-
+                    await adminApi.updateUserRestrictions(user.id, {
+                      transferRestricted: newValue
+                    })
                     toast.success(newValue ? 'Transfers restricted' : 'Transfers enabled')
                     await refetch()
                   } catch (error: any) {
                     console.error('Restriction update error:', error)
-                    toast.error(error.message || 'Failed to update restriction')
+                    toast.error(error.response?.data?.error || 'Failed to update restriction')
                   }
                 }}
                 className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
