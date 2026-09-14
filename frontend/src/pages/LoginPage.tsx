@@ -72,29 +72,47 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error('Full login error:', error);
       
+      // Create detailed error message
+      let errorDetails = '';
+      
       // Handle network errors
       if (error.isNetworkError) {
-        toast.error('Cannot connect to server. Please check your internet connection.')
+        errorDetails = 'Network Error: Cannot reach server. Check internet connection.';
+        toast.error(errorDetails, { duration: 5000 });
         return;
       }
       
       // Handle timeout
       if (error.isTimeout) {
-        toast.error('Request timed out. The server may be slow. Please try again.')
+        errorDetails = 'Timeout: Server is not responding. Try again.';
+        toast.error(errorDetails, { duration: 5000 });
         return;
       }
       
       const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+      const statusCode = error.response?.status || 'No response'
       
       if (error.response?.status === 400 || error.response?.status === 401) {
         toast.error('Invalid email or password. Please check your credentials.')
       } else if (error.response?.status === 403) {
         toast.error('Your account is not active. Please contact support.')
       } else if (error.response?.status >= 500) {
-        toast.error('Server error. Please try again in a few moments.')
+        errorDetails = `Server Error (${statusCode}): ${errorMsg}`;
+        toast.error(errorDetails, { duration: 6000 });
+      } else if (!error.response) {
+        errorDetails = `Connection Failed: ${error.message || 'Cannot reach server'}. Error Code: ${error.code || 'UNKNOWN'}`;
+        toast.error(errorDetails, { duration: 6000 });
       } else {
-        toast.error(errorMsg || 'Login failed. Please try again.')
+        errorDetails = `Login Failed (${statusCode}): ${errorMsg}`;
+        toast.error(errorDetails, { duration: 5000 });
       }
+      
+      // Show detailed info in a second toast for debugging
+      setTimeout(() => {
+        toast.error(`Debug: ${error.config?.baseURL || 'Unknown URL'} - Please screenshot this error and contact support.`, {
+          duration: 8000
+        });
+      }, 500);
     } finally {
       setIsLoading(false)
     }
