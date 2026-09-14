@@ -72,15 +72,32 @@ app.use('/api/savings', savingsRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/pin', pinRoutes);
 
-// Health check
+// Health check with detailed info
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'ok', 
     message: 'Veritas Bank API is running',
     timestamp: new Date().toISOString(),
     region: process.env.RENDER_REGION || 'unknown',
-    version: '1.0.0'
+    version: '1.0.0',
+    database: process.env.DATABASE_URL ? 'connected' : 'not configured'
   });
+});
+
+// Simple ping endpoint
+app.get('/api/ping', (req: Request, res: Response) => {
+  res.json({ pong: true, time: Date.now() });
+});
+
+// Test database connection
+app.get('/api/db-test', async (req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ database: 'connected', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Database test failed:', error);
+    res.status(500).json({ database: 'failed', error: 'Connection failed' });
+  }
 });
 
 // Error handling middleware

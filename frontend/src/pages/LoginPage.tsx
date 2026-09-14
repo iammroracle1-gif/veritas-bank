@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
@@ -13,6 +13,7 @@ interface LoginForm {
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState<string>('')
   const navigate = useNavigate()
   const setAuth = useAuthStore((state) => state.setAuth)
 
@@ -21,6 +22,28 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginForm>()
+
+  // Test backend connection on mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'
+        const response = await fetch(`${API_URL}/ping`, { 
+          method: 'GET',
+          signal: AbortSignal.timeout(5000)
+        })
+        if (response.ok) {
+          setConnectionStatus('connected')
+        } else {
+          setConnectionStatus('error')
+        }
+      } catch (error) {
+        console.error('Connection test failed:', error)
+        setConnectionStatus('failed')
+      }
+    }
+    testConnection()
+  }, [])
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true)
@@ -108,6 +131,15 @@ export default function LoginPage() {
             />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
             <p className="text-gray-600">Sign in to continue to your account</p>
+            
+            {/* Connection Status Indicator */}
+            {connectionStatus === 'failed' && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-xs text-red-700">
+                  Cannot connect to server. Please check your internet or try again later.
+                </p>
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
