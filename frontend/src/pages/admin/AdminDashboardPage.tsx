@@ -9,8 +9,14 @@ export default function AdminDashboardPage() {
     refetchInterval: 30000, // Refetch every 30 seconds
   })
 
-  const stats = dashboardData?.data?.stats
-  const recentTransactions = dashboardData?.data?.recentTransactions || []
+  // Debug logging
+  console.log('Dashboard API response:', dashboardData)
+
+  const stats = dashboardData?.data?.data?.stats || dashboardData?.data?.stats
+  const recentTransactions = dashboardData?.data?.data?.recentTransactions || dashboardData?.data?.recentTransactions || []
+
+  console.log('Stats:', stats)
+  console.log('Recent transactions:', recentTransactions)
 
   const formatNumber = (num: number) => {
     return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

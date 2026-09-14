@@ -12,7 +12,12 @@ export default function AdminTransactionsPage() {
     queryFn: () => adminApi.getTransactions(),
   })
 
-  const transactions = Array.isArray(transactionsData?.data) ? transactionsData.data : []
+  // Debug logging
+  console.log('Transactions API response:', transactionsData)
+
+  const transactions = transactionsData?.data?.data || transactionsData?.data || []
+  
+  console.log('Transactions array:', transactions)
 
   // Filter transactions
   const filteredTransactions = transactions.filter((txn: any) => {

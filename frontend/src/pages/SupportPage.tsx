@@ -57,7 +57,7 @@ export default function SupportPage() {
               </a>
 
               <a
-                href="https://wa.me/13332284434"
+                href="https://wa.me/13322844342"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -70,7 +70,7 @@ export default function SupportPage() {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-gray-500 mb-0.5">WhatsApp</p>
-                    <p className="text-sm text-gray-900 font-medium">+1 333-228-4434</p>
+                    <p className="text-sm text-gray-900 font-medium">+1 (332) 284-4342</p>
                   </div>
                 </div>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
