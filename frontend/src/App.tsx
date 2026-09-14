@@ -16,6 +16,7 @@ import SavingsPage from './pages/SavingsPage'
 import SupportPage from './pages/SupportPage'
 import SettingsPage from './pages/SettingsPage'
 import NotificationsPage from './pages/NotificationsPage'
+import DiagnosticsPage from './pages/DiagnosticsPage'
 
 // Admin Pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
@@ -51,6 +52,7 @@ function App() {
         <Route path="/" element={token ? <Navigate to="/dashboard" /> : <LandingPage />} />
         <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <LoginPage />} />
         <Route path="/register" element={token ? <Navigate to="/dashboard" /> : <RegisterPage />} />
+        <Route path="/diagnostics" element={<DiagnosticsPage />} />
         <Route path="/admin/login" element={token && user?.role === 'ADMIN' ? <Navigate to="/admin" /> : <AdminLoginPage />} />
 
         {/* User Dashboard Routes */}
