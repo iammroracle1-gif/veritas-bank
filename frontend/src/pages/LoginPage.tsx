@@ -25,7 +25,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true)
     try {
+      console.log('Attempting login...');
       const response = await authApi.login(data.email, data.password)
+      console.log('Login response:', response);
+      
       const { user, token } = response.data
       
       // Save to Zustand store
@@ -44,16 +47,31 @@ export default function LoginPage() {
         navigate('/')
       }
     } catch (error: any) {
-      const errorMsg = error.response?.data?.error || error.response?.data?.message
+      console.error('Full login error:', error);
+      
+      // Handle network errors
+      if (error.isNetworkError) {
+        toast.error('Cannot connect to server. Please check your internet connection.')
+        return;
+      }
+      
+      // Handle timeout
+      if (error.isTimeout) {
+        toast.error('Request timed out. The server may be slow. Please try again.')
+        return;
+      }
+      
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
       
       if (error.response?.status === 400 || error.response?.status === 401) {
         toast.error('Invalid email or password. Please check your credentials.')
       } else if (error.response?.status === 403) {
         toast.error('Your account is not active. Please contact support.')
+      } else if (error.response?.status >= 500) {
+        toast.error('Server error. Please try again in a few moments.')
       } else {
         toast.error(errorMsg || 'Login failed. Please try again.')
       }
-      console.error('Login error:', error)
     } finally {
       setIsLoading(false)
     }

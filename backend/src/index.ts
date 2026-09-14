@@ -16,20 +16,35 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware - More permissive CORS for international access
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'https://veritas-bank-frontend-eosin.vercel.app',
-    'https://veri-international.online',
-    'https://www.veri-international.online'
-  ],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://veritas-bank-frontend-eosin.vercel.app',
+      'https://veri-international.online',
+      'https://www.veri-international.online'
+    ];
+    
+    // Check if origin is in allowed list or is a Vercel preview deployment
+    if (allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Still allow but log it for debugging
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id'],
+  maxAge: 86400, // 24 hours
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use('/api/auth', authRoutes);

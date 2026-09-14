@@ -1,13 +1,17 @@
 import axios from 'axios'
 import { useAuthStore } from '../stores/authStore'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'https://veritas-bank-0dru.onrender.com/api'
+
+console.log('API Base URL:', API_URL);
 
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 second timeout
+  withCredentials: false, // Changed to false for better international compatibility
 })
 
 // Request interceptor to add auth token
@@ -17,17 +21,46 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    console.log('API Request:', config.method?.toUpperCase(), config.url);
     return config
   },
   (error) => {
+    console.error('Request error:', error);
     return Promise.reject(error)
   }
 )
 
 // Response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('API Response:', response.config.url, response.status);
+    return response
+  },
   (error) => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
+
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error - no response from server');
+      return Promise.reject({
+        message: 'Network error. Please check your internet connection.',
+        isNetworkError: true
+      });
+    }
+
+    // Handle timeout
+    if (error.code === 'ECONNABORTED') {
+      return Promise.reject({
+        message: 'Request timeout. Please try again.',
+        isTimeout: true
+      });
+    }
+
     if (error.response?.status === 401) {
       useAuthStore.getState().logout()
       window.location.href = '/login'

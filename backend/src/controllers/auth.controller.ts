@@ -83,12 +83,15 @@ export const register = async (req: AuthRequest, res: Response) => {
 export const login = async (req: AuthRequest, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Login validation errors:', errors.array());
     return res.status(400).json({ errors: errors.array() });
   }
 
   const { email, password } = req.body;
 
   try {
+    console.log('Login attempt:', { email, ip: req.ip, origin: req.headers.origin });
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
@@ -96,17 +99,20 @@ export const login = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
+      console.log('Login failed: User not found:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Check password
     const isValidPassword = await comparePassword(password, user.password);
     if (!isValidPassword) {
+      console.log('Login failed: Invalid password for:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Check account status
     if (user.accountStatus !== 'ACTIVE') {
+      console.log('Login failed: Account not active:', email, 'Status:', user.accountStatus);
       return res.status(403).json({ error: 'Account is not active' });
     }
 
@@ -123,6 +129,8 @@ export const login = async (req: AuthRequest, res: Response) => {
       role: user.role,
     });
 
+    console.log('Login successful:', email);
+
     res.json({
       message: 'Login successful',
       token,
@@ -138,7 +146,7 @@ export const login = async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 };
 
